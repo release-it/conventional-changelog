@@ -1,0 +1,46 @@
+{
+  "name": "@release-it/conventional-changelog",
+  "version": "0.0.0",
+  "description": "Conventional changelog plugin for release-it",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava test.js --verbose"
+  },
+  "keywords": [
+    "release",
+    "release-it",
+    "release-it-plugin",
+    "plugin",
+    "conventional",
+    "changelog",
+    "recommended",
+    "bump"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/release-it/conventional-changelog.git"
+  },
+  "homepage": "https://github.com/release-it/conventional-changelog#readme",
+  "bugs": "https://github.com/release-it/conventional-changelog/issues",
+  "author": {
+    "name": "Lars Kappert",
+    "email": "lars@webpro.nl",
+    "url": "https://webpro.nl"
+  },
+  "dependencies": {
+    "concat-stream": "^2.0.0",
+    "conventional-changelog": "^3.0.5",
+    "conventional-recommended-bump": "^4.0.4",
+    "prepend-file": "^1.3.1",
+    "release-it": "^10.0.6"
+  },
+  "devDependencies": {
+    "ava": "^1.2.0",
+    "proxyquire": "^2.1.0",
+    "sinon": "^7.2.3"
+  },
+  "engines": {
+    "node": ">=8"
+  }
+}
