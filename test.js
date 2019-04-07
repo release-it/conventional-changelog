@@ -27,7 +27,8 @@ const Plugin = proxyquire('.', {
   'conventional-changelog': conventionalChangelog
 });
 
-const namespace = 'release-it-conventional-changelog';
+const namespace = 'conventional-changelog';
+const preset = 'angular';
 const infile = 'CHANGES.md';
 
 test.after(() => {
@@ -37,13 +38,13 @@ test.after(() => {
 });
 
 test('should not throw', async t => {
-  const options = { preset: 'angular' };
+  const options = { [namespace]: { preset } };
   const plugin = factory(Plugin, { namespace, options });
   await t.notThrowsAsync(runTasks(plugin));
 });
 
 test('should set changelog', async t => {
-  const options = { preset: 'angular' };
+  const options = { [namespace]: { preset } };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const { changelog } = plugin.config.getContext();
@@ -51,7 +52,7 @@ test('should set changelog', async t => {
 });
 
 test(`should write and update infile (${infile})`, async t => {
-  const options = { preset: 'angular', infile };
+  const options = { [namespace]: { preset, infile } };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const changelog = fs.readFileSync(infile);
@@ -64,13 +65,13 @@ test(`should write and update infile (${infile})`, async t => {
 });
 
 test('should reject if conventional bump passes error', async t => {
-  const options = { preset: 'what?' };
+  const options = { [namespace]: { preset: 'what?' } };
   const plugin = factory(Plugin, { namespace, options });
   await t.throwsAsync(runTasks(plugin), /Something went wrong/);
 });
 
 test('should reject if conventional changelog has error', async t => {
-  const options = { preset: 'angular', releaseCount: -1 };
+  const options = { [namespace]: { preset, releaseCount: -1 } };
   const plugin = factory(Plugin, { namespace, options });
   await t.throwsAsync(runTasks(plugin), /Something went wrong/);
 });
