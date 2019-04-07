@@ -1,6 +1,6 @@
 const { EOL } = require('os');
 const fs = require('fs');
-const Plugin = require('release-it/lib/plugin');
+const { Plugin } = require('release-it');
 const conventionalRecommendedBump = require('conventional-recommended-bump');
 const conventionalChangelog = require('conventional-changelog');
 const semver = require('semver');
