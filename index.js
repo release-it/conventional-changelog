@@ -25,8 +25,10 @@ class ConventionalChangelog extends Plugin {
     );
   }
 
-  getChangelogStream(options) {
-    return conventionalChangelog(options);
+  getChangelogStream(options = {}) {
+    return conventionalChangelog(Object.assign(options, this.options), null, {
+      debug: this.config.isDebug ? this.debug : null
+    });
   }
 
   getChangelog(options) {
@@ -51,7 +53,7 @@ class ConventionalChangelog extends Plugin {
     }
 
     if (!hasInfile) {
-      changelog = await this.getChangelog(Object.assign({ releaseCount: 0 }, this.options));
+      changelog = await this.getChangelog({ releaseCount: 0 });
       this.debug({ changelog });
     }
 
@@ -68,12 +70,11 @@ class ConventionalChangelog extends Plugin {
   }
 
   async beforeRelease() {
-    const options = Object.assign({}, this.options);
-    const changelog = await this.getChangelog(options);
+    const changelog = await this.getChangelog();
     this.debug({ changelog });
     this.config.setContext({ changelog });
 
-    if (options.infile) {
+    if (this.options.infile) {
       await this.writeChangelog();
     }
   }
