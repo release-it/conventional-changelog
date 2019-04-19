@@ -14,8 +14,13 @@ class ConventionalChangelog extends Plugin {
       conventionalRecommendedBump(this.options, (err, result) => {
         this.debug({ err, result });
         if (err) return reject(err);
-        const type = isPreRelease ? `pre${result.releaseType}` : result.releaseType;
-        resolve(semver.inc(latestVersion, type, preReleaseId));
+        const { releaseType } = result;
+        if (releaseType) {
+          const type = isPreRelease ? `pre${result.releaseType}` : result.releaseType;
+          resolve(semver.inc(latestVersion, type, preReleaseId));
+        } else {
+          resolve(null);
+        }
       })
     );
   }
