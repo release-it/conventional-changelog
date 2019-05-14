@@ -70,11 +70,15 @@ class ConventionalChangelog extends Plugin {
   }
 
   async beforeRelease() {
+    const { infile } = this.options;
+    const { isDryRun } = this.global;
     const changelog = await this.getChangelog();
     this.debug({ changelog });
     this.config.setContext({ changelog });
 
-    if (this.options.infile) {
+    this.log.exec(`Writing changelog to ${infile}`, isDryRun);
+
+    if (infile && !isDryRun) {
       await this.writeChangelog();
     }
   }

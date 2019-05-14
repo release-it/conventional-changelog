@@ -75,3 +75,13 @@ test('should reject if conventional changelog has error', async t => {
   const plugin = factory(Plugin, { namespace, options });
   await t.throwsAsync(runTasks(plugin), /Something went wrong/);
 });
+
+test('should not write infile in dry run', async t => {
+  const infile = 'DRYRUN.md';
+  const options = { [namespace]: { preset, infile } };
+  const plugin = factory(Plugin, { namespace, options, global: { isDryRun: true } });
+  const spy = sinon.spy(plugin, 'writeChangelog');
+  await runTasks(plugin);
+  t.is(spy.callCount, 0);
+  t.throws(() => fs.readFileSync(infile), /no such file/);
+});
