@@ -8,6 +8,10 @@ const concat = require('concat-stream');
 const prependFile = require('prepend-file');
 
 class ConventionalChangelog extends Plugin {
+  static disablePlugin() {
+    return 'version';
+  }
+
   getIncrementedVersion() {
     const { latestVersion, isPreRelease, preReleaseId } = this.config.getContext();
     return new Promise((resolve, reject) =>
