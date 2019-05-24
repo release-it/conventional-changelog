@@ -51,6 +51,30 @@ test('should set changelog', async t => {
   t.is(changelog, 'The changelog');
 });
 
+test('should use recommended bump', async t => {
+  const options = { [namespace]: { preset } };
+  const plugin = factory(Plugin, { namespace, options });
+  await runTasks(plugin);
+  const { version } = plugin.config.getContext();
+  t.is(version, '1.1.0');
+});
+
+test('should use provided increment', async t => {
+  const options = { increment: 'major', [namespace]: { preset } };
+  const plugin = factory(Plugin, { namespace, options });
+  await runTasks(plugin);
+  const { version } = plugin.config.getContext();
+  t.is(version, '2.0.0');
+});
+
+test('should use provided version', async t => {
+  const options = { increment: '1.2.3', [namespace]: { preset } };
+  const plugin = factory(Plugin, { namespace, options });
+  await runTasks(plugin);
+  const { version } = plugin.config.getContext();
+  t.is(version, '1.2.3');
+});
+
 test(`should write and update infile (${infile})`, async t => {
   const options = { [namespace]: { preset, infile } };
   const plugin = factory(Plugin, { namespace, options });

@@ -12,15 +12,21 @@ class ConventionalChangelog extends Plugin {
     return 'version';
   }
 
-  getIncrementedVersion() {
-    const { latestVersion, isPreRelease, preReleaseId } = this.config.getContext();
+  getIncrementedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
+    this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
     return new Promise((resolve, reject) =>
       conventionalRecommendedBump(this.options, (err, result) => {
         this.debug({ err, result });
         if (err) return reject(err);
-        const { releaseType } = result;
-        if (releaseType) {
-          const type = isPreRelease ? `pre${result.releaseType}` : result.releaseType;
+        let { releaseType } = result;
+        if(increment) {
+          this.log.warn(`Recommended bump is "${releaseType}", but is overridden with "${increment}".`)
+          releaseType = increment;
+        }
+        if(increment && semver.valid(increment)) {
+          resolve(increment);
+        } else if (releaseType) {
+          const type = isPreRelease ? `pre${releaseType}` : releaseType;
           resolve(semver.inc(latestVersion, type, preReleaseId));
         } else {
           resolve(null);
