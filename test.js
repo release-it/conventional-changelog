@@ -31,7 +31,7 @@ const namespace = 'conventional-changelog';
 const preset = 'angular';
 const infile = 'CHANGES.md';
 
-test.after(() => {
+test.after.always(() => {
   try {
     fs.unlinkSync(infile);
   } catch (err) {}
