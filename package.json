@@ -4,7 +4,7 @@
   "description": "Conventional changelog plugin for release-it",
   "main": "index.js",
   "scripts": {
-    "test": "ava test.js --verbose",
+    "test": "bron test.js",
     "release": "release-it"
   },
   "keywords": [
@@ -37,7 +37,7 @@
     "release-it": "^12.2.1"
   },
   "devDependencies": {
-    "ava": "^1.4.1",
+    "bron": "0.0.1",
     "proxyquire": "^2.1.0",
     "sinon": "^7.3.1"
   },
