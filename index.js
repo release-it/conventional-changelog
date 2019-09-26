@@ -3,6 +3,7 @@ const fs = require('fs');
 const { Plugin } = require('release-it');
 const conventionalRecommendedBump = require('conventional-recommended-bump');
 const conventionalChangelog = require('conventional-changelog');
+const gitSemverTags = require('git-semver-tags');
 const semver = require('semver');
 const concat = require('concat-stream');
 const prependFile = require('prepend-file');
@@ -13,7 +14,9 @@ class ConventionalChangelog extends Plugin {
   }
 
   getIncrementedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
+    this.setContext({ increment });
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
+    if (increment === false) return latestVersion;
     return new Promise((resolve, reject) =>
       conventionalRecommendedBump(this.options, (err, result) => {
         this.debug({ err, result });
@@ -35,18 +38,33 @@ class ConventionalChangelog extends Plugin {
     );
   }
 
-  getChangelogStream(options = {}) {
-    return conventionalChangelog(Object.assign(options, this.options), null, {
+  async getChangelogStream(options = {}) {
+    const { increment } = this.getContext();
+    const gitRawCommitsOpts = {
       debug: this.config.isDebug ? this.debug : null
-    });
+    };
+    if (increment === false) {
+      const tags = await new Promise((resolve, reject) => {
+        gitSemverTags((err, tags) => {
+          if(err){
+            reject(err);
+          } else {
+            resolve(tags);
+          }
+        });
+      });
+      gitRawCommitsOpts.from = tags[1] || null;
+    }
+    return conventionalChangelog(Object.assign(options, this.options), null, gitRawCommitsOpts);
   }
 
   getChangelog(options) {
     return new Promise((resolve, reject) => {
       const resolver = result => resolve(result.toString().trim());
-      const changelogStream = this.getChangelogStream(options);
-      changelogStream.pipe(concat(resolver));
-      changelogStream.on('error', reject);
+      this.getChangelogStream(options).then((changelogStream) => {
+        changelogStream.pipe(concat(resolver));
+        changelogStream.on('error', reject);
+      });
     });
   }
 
