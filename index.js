@@ -19,11 +19,11 @@ class ConventionalChangelog extends Plugin {
         this.debug({ err, result });
         if (err) return reject(err);
         let { releaseType } = result;
-        if(increment) {
-          this.log.warn(`Recommended bump is "${releaseType}", but is overridden with "${increment}".`)
+        if (increment) {
+          this.log.warn(`Recommended bump is "${releaseType}", but is overridden with "${increment}".`);
           releaseType = increment;
         }
-        if(increment && semver.valid(increment)) {
+        if (increment && semver.valid(increment)) {
           resolve(increment);
         } else if (releaseType) {
           const type = isPreRelease ? `pre${releaseType}` : releaseType;

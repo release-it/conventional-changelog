@@ -13,14 +13,14 @@ const conventionalRecommendedBump = sinon.stub().callsFake((options, cb) => {
 });
 
 const conventionalChangelog = sinon.stub().callsFake(options => {
-  const s = new stream.Readable();
-  s._read = () => {};
+  const readableStream = new stream.Readable();
+  readableStream._read = () => {};
   process.nextTick(() => {
-    s.emit('data', 'The changelog');
-    if (options.releaseCount < 0) s.emit('error', new Error('Something went wrong'));
-    s.emit('end');
+    readableStream.emit('data', 'The changelog');
+    if (options.releaseCount < 0) readableStream.emit('error', new Error('Something went wrong'));
+    readableStream.emit('end');
   });
-  return s;
+  return readableStream;
 });
 
 const Plugin = proxyquire('.', {
