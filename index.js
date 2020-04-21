@@ -35,13 +35,17 @@ class ConventionalChangelog extends Plugin {
     );
   }
 
+  getChangelog(latestVersion) {
+    return this.generateChangelog();
+  }
+
   getChangelogStream(options = {}) {
     return conventionalChangelog(Object.assign(options, this.options), null, {
       debug: this.config.isDebug ? this.debug : null
     });
   }
 
-  getChangelog(options) {
+  generateChangelog(options) {
     return new Promise((resolve, reject) => {
       const resolver = result => resolve(result.toString().trim());
       const changelogStream = this.getChangelogStream(options);
@@ -63,7 +67,7 @@ class ConventionalChangelog extends Plugin {
     }
 
     if (!hasInfile) {
-      changelog = await this.getChangelog({ releaseCount: 0 });
+      changelog = await this.generateChangelog({ releaseCount: 0 });
       this.debug({ changelog });
     }
 
@@ -82,9 +86,6 @@ class ConventionalChangelog extends Plugin {
   async beforeRelease() {
     const { infile } = this.options;
     const { isDryRun } = this.global;
-    const changelog = await this.getChangelog();
-    this.debug({ changelog });
-    this.config.setContext({ changelog });
 
     this.log.exec(`Writing changelog to ${infile}`, isDryRun);
 
