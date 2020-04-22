@@ -31,15 +31,16 @@ const Plugin = proxyquire('.', {
 const namespace = 'conventional-changelog';
 const preset = 'angular';
 const infile = 'CHANGES.md';
+const git = { tagName: '${version}' };
 
 test('should not throw', async t => {
-  const options = { [namespace]: { preset } };
+  const options = { [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
   await assert.doesNotReject(runTasks(plugin));
 });
 
 test('should set changelog', async t => {
-  const options = { [namespace]: { preset } };
+  const options = { [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const { changelog } = plugin.config.getContext();
@@ -47,7 +48,7 @@ test('should set changelog', async t => {
 });
 
 test('should use recommended bump', async t => {
-  const options = { [namespace]: { preset } };
+  const options = { [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const { version } = plugin.config.getContext();
@@ -55,7 +56,7 @@ test('should use recommended bump', async t => {
 });
 
 test('should use provided increment', async t => {
-  const options = { increment: 'major', [namespace]: { preset } };
+  const options = { increment: 'major', [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const { version } = plugin.config.getContext();
@@ -63,7 +64,7 @@ test('should use provided increment', async t => {
 });
 
 test('should use provided version', async t => {
-  const options = { increment: '1.2.3', [namespace]: { preset } };
+  const options = { increment: '1.2.3', [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const { version } = plugin.config.getContext();
@@ -71,7 +72,7 @@ test('should use provided version', async t => {
 });
 
 test(`should write and update infile (${infile})`, async t => {
-  const options = { [namespace]: { preset, infile } };
+  const options = { [namespace]: { preset, infile }, git };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const changelog = fs.readFileSync(infile);
@@ -85,20 +86,20 @@ test(`should write and update infile (${infile})`, async t => {
 });
 
 test('should reject if conventional bump passes error', async t => {
-  const options = { [namespace]: { preset: 'what?' } };
+  const options = { [namespace]: { preset: 'what?' }, git };
   const plugin = factory(Plugin, { namespace, options });
   await assert.rejects(runTasks(plugin), /Something went wrong/);
 });
 
 test('should reject if conventional changelog has error', async t => {
-  const options = { [namespace]: { preset, releaseCount: -1 } };
+  const options = { [namespace]: { preset, releaseCount: -1 }, git };
   const plugin = factory(Plugin, { namespace, options });
   await assert.rejects(runTasks(plugin), /Something went wrong/);
 });
 
 test('should not write infile in dry run', async t => {
   const infile = 'DRYRUN.md';
-  const options = { [namespace]: { preset, infile } };
+  const options = { [namespace]: { preset, infile }, git };
   const plugin = factory(Plugin, { namespace, options, global: { isDryRun: true } });
   const spy = sinon.spy(plugin, 'writeChangelog');
   await runTasks(plugin);

@@ -12,7 +12,32 @@ class ConventionalChangelog extends Plugin {
     return 'version';
   }
 
+  getInitialOptions(options, namespace) {
+    options[namespace].tagName = options.git.tagName;
+    return options[namespace];
+  }
+
+  async getChangelog(latestVersion) {
+    const { version, previousTag, currentTag } = await this.getConventionalConfig(latestVersion);
+    this.setContext({ version, previousTag, currentTag });
+    return this.generateChangelog();
+  }
+
+  async getConventionalConfig(latestVersion) {
+    const { increment, isPreRelease, preReleaseId } = this.config.getContext('version');
+    const version = await this.getIncrementedVersion({ increment, latestVersion, isPreRelease, preReleaseId });
+    this.setContext({ version });
+
+    const previousTag = this.config.getContext('latestTag');
+    const tagTemplate = this.options.tagName || ((previousTag || '').match(/^v/) ? 'v${version}' : '${version}');
+    const currentTag = tagTemplate.replace('${version}', version);
+
+    return { version, previousTag, currentTag };
+  }
+
   getIncrementedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
+    const { version } = this.getContext();
+    if (version) return version;
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
     return new Promise((resolve, reject) =>
       conventionalRecommendedBump(this.options, (err, result) => {
@@ -35,14 +60,15 @@ class ConventionalChangelog extends Plugin {
     );
   }
 
-  getChangelog(latestVersion) {
-    return this.generateChangelog();
-  }
-
   getChangelogStream(options = {}) {
-    return conventionalChangelog(Object.assign(options, this.options), null, {
-      debug: this.config.isDebug ? this.debug : null
-    });
+    const { version, previousTag, currentTag } = this.getContext();
+    return conventionalChangelog(
+      Object.assign(options, this.options),
+      { version, previousTag, currentTag },
+      {
+        debug: this.config.isDebug ? this.debug : null
+      }
+    );
   }
 
   generateChangelog(options) {
