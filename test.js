@@ -137,8 +137,8 @@ test('should reject if conventional changelog has error', async t => {
 
 test('should not write infile in dry run', async t => {
   const infile = 'DRYRUN.md';
-  const options = { [namespace]: { preset, infile }, git };
-  const plugin = factory(Plugin, { namespace, options, global: { isDryRun: true } });
+  const options = { 'dry-run': true, [namespace]: { preset, infile }, git };
+  const plugin = factory(Plugin, { namespace, options });
   const spy = sinon.spy(plugin, 'writeChangelog');
   await runTasks(plugin);
   assert.strictEqual(spy.callCount, 0);
