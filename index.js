@@ -99,12 +99,7 @@ class ConventionalChangelog extends Plugin {
       this.debug({ changelog });
     }
 
-    await new Promise((resolve, reject) =>
-      prependFile(infile, changelog + EOL + EOL, err => {
-        if (err) return reject(err);
-        resolve();
-      })
-    );
+    await prependFile(infile, changelog + EOL + EOL);
 
     if (!hasInfile) {
       await this.exec(`git add ${infile}`);
