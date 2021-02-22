@@ -38,9 +38,11 @@ class ConventionalChangelog extends Plugin {
   getIncrementedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
     const { version } = this.getContext();
     if (version) return version;
+    const { options } = this;
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
+    this.debug('conventionalRecommendedBump', { options });
     return new Promise((resolve, reject) =>
-      conventionalRecommendedBump(this.options, (err, result) => {
+      conventionalRecommendedBump(options, (err, result) => {
         this.debug({ err, result });
         if (err) return reject(err);
         let { releaseType } = result;
@@ -62,15 +64,14 @@ class ConventionalChangelog extends Plugin {
     );
   }
 
-  getChangelogStream(options = {}) {
+  getChangelogStream(opts = {}) {
     const { version, previousTag, currentTag } = this.getContext();
-    return conventionalChangelog(
-      Object.assign(options, this.options),
-      { version, previousTag, currentTag },
-      {
-        debug: this.config.isDebug ? this.debug : null
-      }
-    );
+    const options = Object.assign({}, opts, this.options);
+    const context = { version, previousTag, currentTag };
+    const debug = this.config.isDebug ? this.debug : null;
+    const gitRawCommitsOpts = { debug };
+    this.debug('conventionalChangelog', { options, context, gitRawCommitsOpts });
+    return conventionalChangelog(options, context, gitRawCommitsOpts);
   }
 
   generateChangelog(options) {
