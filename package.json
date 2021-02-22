@@ -31,15 +31,15 @@
   },
   "dependencies": {
     "concat-stream": "^2.0.0",
-    "conventional-changelog": "^3.1.23",
-    "conventional-recommended-bump": "^6.0.10",
+    "conventional-changelog": "^3.1.24",
+    "conventional-recommended-bump": "^6.1.0",
     "prepend-file": "^2.0.0"
   },
   "devDependencies": {
     "bron": "^1.1.1",
     "proxyquire": "^2.1.0",
-    "release-it": "^14.0.0",
-    "sinon": "^9.0.3"
+    "release-it": "^14.4.1",
+    "sinon": "^9.2.4"
   },
   "peerDependencies": {
     "release-it": "^14.0.0"
