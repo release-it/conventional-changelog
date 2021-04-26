@@ -83,8 +83,18 @@ class ConventionalChangelog extends Plugin {
     });
   }
 
-  async writeChangelog() {
+  getOldChangelog() {
     const { infile } = this.options;
+    return new Promise((resolve, reject) => {
+      const readStream = fs.createReadStream(infile);
+      const resolver = result => resolve(result.toString().trim());
+      readStream.pipe(concat(resolver));
+      readStream.on('error', reject);
+    });
+  }
+
+  async writeChangelog() {
+    const { infile, header } = this.options;
     let { changelog } = this.config.getContext();
 
     let hasInfile = false;
@@ -95,12 +105,20 @@ class ConventionalChangelog extends Plugin {
       this.debug(err);
     }
 
+    let oldChangelog = ""
+    try{
+      oldChangelog = await this.getOldChangelog();
+      oldChangelog = oldChangelog.replace(new RegExp(EOL, 'g'), '\n').replace(header, '');
+    }catch(err){
+      this.debug(err);
+    }
+
     if (!hasInfile) {
       changelog = await this.generateChangelog({ releaseCount: 0 });
       this.debug({ changelog });
     }
 
-    await prependFile(infile, changelog + EOL + EOL);
+    fs.writeFileSync(infile, header + EOL + EOL + changelog + EOL + EOL + oldChangelog);
 
     if (!hasInfile) {
       await this.exec(`git add ${infile}`);
