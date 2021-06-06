@@ -55,6 +55,16 @@ test('should use recommended bump', async t => {
   assert.strictEqual(version, '1.1.0');
 });
 
+test('should ignore recommended bump (option)', async t => {
+  const options = { [namespace]: { preset, ignoreRecommendedBump: true }, git };
+  const plugin = factory(Plugin, { namespace, options });
+  const spy = sinon.spy(plugin, 'generateChangelog');
+  await runTasks(plugin);
+  const { version } = plugin.config.getContext();
+  assert.strictEqual(spy.callCount, 2);
+  assert.strictEqual(version, '1.0.1');
+});
+
 test('should ignore recommended bump (prelease)', async t => {
   const options = { preRelease: 'alpha', [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });

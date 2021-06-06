@@ -8,8 +8,8 @@ const concat = require('concat-stream');
 const prependFile = require('prepend-file');
 
 class ConventionalChangelog extends Plugin {
-  static disablePlugin() {
-    return 'version';
+  static disablePlugin(options) {
+    return options.ignoreRecommendedBump ? null : 'version';
   }
 
   getInitialOptions(options, namespace) {
@@ -18,24 +18,13 @@ class ConventionalChangelog extends Plugin {
   }
 
   async getChangelog(latestVersion) {
-    const { version, previousTag, currentTag } = await this.getConventionalConfig(latestVersion);
-    this.setContext({ version, previousTag, currentTag });
+    const { increment, isPreRelease, preReleaseId } = this.config.getContext('version');
+    const version = await this.getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId });
+    this.setContext({ version });
     return this.generateChangelog();
   }
 
-  async getConventionalConfig(latestVersion) {
-    const { increment, isPreRelease, preReleaseId } = this.config.getContext('version');
-    const version = await this.getIncrementedVersion({ increment, latestVersion, isPreRelease, preReleaseId });
-    this.setContext({ version });
-
-    const previousTag = this.config.getContext('latestTag');
-    const tagTemplate = this.options.tagName || ((previousTag || '').match(/^v/) ? 'v${version}' : '${version}');
-    const currentTag = tagTemplate.replace('${version}', version);
-
-    return { version, previousTag, currentTag };
-  }
-
-  getIncrementedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
+  getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
     const { version } = this.getContext();
     if (version) return version;
     const { options } = this;
@@ -47,7 +36,7 @@ class ConventionalChangelog extends Plugin {
         if (err) return reject(err);
         let { releaseType } = result;
         if (increment) {
-          this.log.warn(`Recommended bump is "${releaseType}", but is overridden with "${increment}".`);
+          this.log.warn(`The recommended bump is "${releaseType}", but is overridden with "${increment}".`);
           releaseType = increment;
         }
         if (increment && semver.valid(increment)) {
@@ -65,7 +54,10 @@ class ConventionalChangelog extends Plugin {
   }
 
   getChangelogStream(opts = {}) {
-    const { version, previousTag, currentTag } = this.getContext();
+    const { version } = this.getContext();
+    const previousTag = this.config.getContext('latestTag');
+    const tagTemplate = this.options.tagName || ((previousTag || '').match(/^v/) ? 'v${version}' : '${version}');
+    const currentTag = tagTemplate.replace('${version}', version);
     const options = Object.assign({}, opts, this.options);
     const context = { version, previousTag, currentTag };
     const debug = this.config.isDebug ? this.debug : null;
@@ -104,6 +96,22 @@ class ConventionalChangelog extends Plugin {
 
     if (!hasInfile) {
       await this.exec(`git add ${infile}`);
+    }
+  }
+
+  getIncrementedVersion(options) {
+    const { ignoreRecommendedBump } = this.options;
+    return ignoreRecommendedBump ? null : this.getRecommendedVersion(options);
+  }
+
+  async bump(version) {
+    const recommendedVersion = this.getContext('version');
+
+    this.setContext({ version });
+
+    if (this.options.ignoreRecommendedBump && recommendedVersion !== version) {
+      const changelog = await this.generateChangelog();
+      this.config.setContext({ changelog });
     }
   }
 
