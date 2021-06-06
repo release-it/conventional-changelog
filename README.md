@@ -31,6 +31,7 @@ Use one of:
 - `angular`
 - `atom`
 - `codemirror`
+- `conventionalcommits`
 - `ember`
 - `eslint`
 - `express`
@@ -38,7 +39,7 @@ Use one of:
 - `jscs`
 - `jshint`
 
-Use an object with `name` and `types` to use a custom preset, such as conventional commits:
+Use an object with `name` and `types` to use a custom preset:
 
 ```json
 "plugins": {
@@ -61,6 +62,10 @@ Use an object with `name` and `types` to use a custom preset, such as convention
   }
 }
 ```
+
+See the
+[Conventional Changelog Configuration Spec (v2.1.0)](https://github.com/conventional-changelog/conventional-changelog-config-spec/blob/master/versions/2.1.0/README.md)
+for the configuration object to pass as `preset`.
 
 ### `infile`
 
