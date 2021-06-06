@@ -1,6 +1,6 @@
 {
   "name": "@release-it/conventional-changelog",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Conventional changelog plugin for release-it",
   "main": "index.js",
   "scripts": {
@@ -45,7 +45,7 @@
     "release-it": "^14.8.0"
   },
   "engines": {
-    "node": ">=8"
+    "node": ">=10"
   },
   "release-it": {
     "hooks": {
