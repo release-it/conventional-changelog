@@ -104,6 +104,10 @@ class ConventionalChangelog extends Plugin {
     return ignoreRecommendedBump ? null : this.getRecommendedVersion(options);
   }
 
+  getIncrementedVersionCI(options) {
+    return this.getIncrementedVersion(options)
+  }
+
   async bump(version) {
     const recommendedVersion = this.getContext('version');
 
