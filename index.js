@@ -1,11 +1,11 @@
-const { EOL } = require('os');
-const fs = require('fs');
-const { Plugin } = require('release-it');
-const conventionalRecommendedBump = require('conventional-recommended-bump');
-const conventionalChangelog = require('conventional-changelog');
-const semver = require('semver');
-const concat = require('concat-stream');
-const prependFile = require('prepend-file');
+import { EOL } from 'os';
+import fs from 'fs';
+import { Plugin } from 'release-it';
+import conventionalRecommendedBump from 'conventional-recommended-bump';
+import conventionalChangelog from 'conventional-changelog';
+import semver from 'semver';
+import concat from 'concat-stream';
+import prependFile from 'prepend-file';
 
 class ConventionalChangelog extends Plugin {
   static disablePlugin(options) {
@@ -138,4 +138,4 @@ class ConventionalChangelog extends Plugin {
   }
 }
 
-module.exports = ConventionalChangelog;
+export default ConventionalChangelog;
