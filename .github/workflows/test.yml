@@ -1,0 +1,28 @@
+name: Cross-OS Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        node:
+          - 12
+          - 14
+          - 16
+
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} (Node v${{ matrix.node }})
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          git config --global init.defaultBranch main
+          git config --global user.name User
+          git config --global user.email user@example.org
+      - run: npm install
+      - run: npm test
