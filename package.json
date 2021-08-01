@@ -37,16 +37,17 @@
     "prepend-file": "^2.0.0"
   },
   "devDependencies": {
-    "bron": "^1.1.1",
-    "proxyquire": "^2.1.0",
-    "release-it": "^14.11.1",
-    "sinon": "^11.1.1"
+    "bron": "^2.0.2",
+    "release-it": "^15.0.0-esm.2",
+    "shelljs": "^0.8.4",
+    "sinon": "^11.1.2",
+    "tmp": "^0.2.1"
   },
   "peerDependencies": {
-    "release-it": "^14.11.1"
+    "release-it": "^15.0.0-esm.2"
   },
   "engines": {
-    "node": ">=10"
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
   },
   "release-it": {
     "hooks": {
