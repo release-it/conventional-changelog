@@ -2,23 +2,47 @@ import test from 'bron';
 import { strict as assert } from 'assert';
 import fs from 'fs';
 import path from 'path';
-import sinon from 'sinon';
 import sh from 'shelljs';
 import tmp from 'tmp';
-import { factory, runTasks } from 'release-it/test/util';
-import Plugin from './index.js';
+import runTasks from 'release-it';
 
 sh.config.silent = true;
 
-const mkTmpDir = () => {
-  const dir = tmp.dirSync({ prefix: 'conventional-changelog-' });
-  return dir.name;
+const noop = () => {};
+const log = {
+  log: noop,
+  error: noop,
+  verbose: noop,
+  info: noop,
+  obtrusive: noop,
+  exec: noop,
+  warn: noop,
+  preview: noop
 };
 
 const namespace = 'conventional-changelog';
+const { pathname } = new URL('./index.js', import.meta.url);
 const preset = 'angular';
-const infile = 'CHANGES.md';
-const git = { tagName: '${version}' };
+
+const getOptions = options => [
+  {
+    ci: true,
+    'disable-metrics': true,
+    git: {
+      commit: false,
+      tag: false,
+      push: false,
+      requireUpstream: false
+    },
+    plugins: { [pathname]: [namespace, options] }
+  },
+  { log }
+];
+
+const mkTmpDir = () => {
+  const dir = tmp.dirSync({ prefix: namespace });
+  return dir.name;
+};
 
 const add = (type, file) => {
   sh.ShellString(file).toEnd(file);
@@ -34,186 +58,192 @@ const setup = () => {
   return { dir };
 };
 
-test('should not throw', async () => {
-  const options = { [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  await assert.doesNotReject(runTasks(plugin));
-});
-
-test('should set changelog using recommended bump (minor)', async () => {
+test('should generate changelog using recommended bump (minor)', async () => {
   setup();
 
   sh.exec(`git tag 1.0.0`);
   add('fix', 'bar');
   add('feat', 'baz');
 
-  const options = { [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const { changelog } = plugin.config.getContext();
+  const options = getOptions({ preset });
+  const { changelog } = await runTasks(...options);
   assert.match(
     changelog,
     /# \[1\.1\.0\]\(\/compare\/1\.0\.0\.\.\.1\.1\.0\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}\n\n\n### Features\n\n\* \*\*baz:\*\* feat baz [0-9a-f]{7}/
   );
-  sh.popd();
 });
 
-test('should set changelog using recommended bump (patch)', async () => {
+test('should generate changelog using recommended bump (patch)', async () => {
   setup();
 
   sh.exec(`git tag 1.0.0`);
   add('fix', 'bar');
   add('fix', 'baz');
 
-  const options = { [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const { changelog } = plugin.config.getContext();
+  const options = getOptions({ preset });
+  const { changelog } = await runTasks(...options);
   assert.match(
     changelog,
     /# \[1\.0\.1\]\(\/compare\/1\.0\.0\.\.\.1\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}\n\* \*\*baz:\*\* fix baz [0-9a-f]{7}/
   );
-  sh.popd();
+});
+
+test('should support tag prefix', async () => {
+  setup();
+
+  sh.exec(`git tag next-2.0.0`);
+  add('fix', 'bar');
+
+  const [config, container] = getOptions({ preset });
+  config.git.tagName = 'next-${version}';
+  const { changelog } = await runTasks(config, container);
+  assert.match(
+    changelog,
+    /# \[2\.0\.1\]\(\/compare\/next-2\.0\.0\.\.\.next-2\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}/
+  );
+});
+
+test('should respect --no-increment and return previous, identical changelog', async () => {
+  setup();
+
+  sh.exec(`git tag 1.0.0`);
+  add('fix', 'bar');
+  add('fix', 'baz');
+  sh.exec(`git tag 1.0.1`);
+
+  const [config, container] = getOptions({ preset });
+  config.increment = false;
+  const { changelog } = await runTasks(config, container);
+  assert.match(
+    changelog,
+    /# \[1\.0\.1\]\(\/compare\/1\.0\.0\.\.\.1\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}\n\* \*\*baz:\*\* fix baz [0-9a-f]{7}/
+  );
 });
 
 test('should ignore recommended bump (option)', async () => {
   setup();
+  sh.exec(`git tag 1.0.0`);
   add('feat', 'baz');
 
-  const options = { [namespace]: { preset, ignoreRecommendedBump: true }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  const spy = sinon.spy(plugin, 'generateChangelog');
-  await runTasks(plugin);
-  const { version } = plugin.config.getContext();
-  assert.equal(spy.callCount, 2);
+  const options = getOptions({ preset, ignoreRecommendedBump: true });
+  const { version } = await runTasks(...options);
   assert.equal(version, '1.0.1');
-  spy.restore();
 });
 
-test('should ignore recommended bump (prelease)', async () => {
+test('should ignore recommended bump for pre-release', async () => {
   setup();
+  sh.exec(`git tag 1.0.0`);
+  add('feat', 'baz');
 
-  const options = { preRelease: 'alpha', [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const { version } = plugin.config.getContext();
+  const [config, container] = getOptions({ preset });
+  config.preRelease = 'alpha';
+  const { version } = await runTasks(config, container);
   assert.equal(version, '1.0.1-alpha.0');
 });
 
-test('should ignore recommended bump (prelease continuation)', async () => {
+test('should ignore recommended bump for pre-release continuation', async () => {
   setup();
+  sh.exec(`git tag 1.0.1-alpha.0`);
+  add('feat', 'baz');
 
-  const options = { preRelease: 'alpha', [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.0.1-alpha.0');
-  await runTasks(plugin);
-  const { version } = plugin.config.getContext();
+  const [config, container] = getOptions({ preset });
+  config.preRelease = 'alpha';
+  const { version } = await runTasks(config, container);
   assert.equal(version, '1.0.1-alpha.1');
-  stub.restore();
 });
 
-test('should ignore recommended bump (next prelease)', async () => {
+test('should ignore recommended bump for next pre-release id', async () => {
   setup();
+  sh.exec(`git tag 1.0.1-alpha.1`);
 
-  const options = { preRelease: 'beta', [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.0.1-alpha.1');
-  await runTasks(plugin);
-  const { version } = plugin.config.getContext();
+  const [config, container] = getOptions({ preset });
+  config.preRelease = 'beta';
+  const { version } = await runTasks(config, container);
   assert.equal(version, '1.0.1-beta.0');
-  stub.restore();
+  sh.popd();
 });
 
-test('should use recommended bump (from prelease)', async () => {
+test('should use recommended bump from pre-release', async () => {
   setup();
+  sh.exec(`git tag 1.0.1-beta.0`);
+  add('feat', 'baz');
 
-  const options = { [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.0.1-beta.0');
-  await runTasks(plugin);
-  const { version } = plugin.config.getContext();
-  assert.equal(version, '1.0.1');
-  stub.restore();
+  const options = getOptions({ preset });
+  const { version } = await runTasks(...options);
+  assert.equal(version, '1.1.0');
+  sh.popd();
 });
 
 test('should use provided increment', async () => {
   setup();
+  sh.exec(`git tag 1.0.0`);
 
-  const options = { increment: 'major', [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const { version } = plugin.config.getContext();
+  const [config, container] = getOptions({ preset });
+  config.increment = 'major';
+  const { version } = await runTasks(config, container);
   assert.equal(version, '2.0.0');
 });
 
-test('should use provided version', async () => {
+test('should use provided version (ignore recommended bump)', async () => {
   setup();
 
-  const options = { increment: '1.2.3', [namespace]: { preset }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const { version } = plugin.config.getContext();
+  const [config, container] = getOptions({ preset });
+  config.increment = '1.2.3';
+  const { version } = await runTasks(config, container);
   assert.equal(version, '1.2.3');
 });
 
-test(`should write and update infile (${infile})`, async () => {
+test(`should write and update infile`, async () => {
   const { dir } = setup();
+  sh.exec(`git tag 1.0.0`);
+  add('fix', 'foo');
   add('feat', 'bar');
 
-  const f = path.join(dir, infile);
-  const options = { [namespace]: { preset, infile: f }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const changelog = fs.readFileSync(f);
+  const infile = path.join(dir, 'CHANGES.md');
+  const [config, container] = getOptions({ preset, infile });
+  config.git.tag = true;
+  await runTasks(config, container);
+  const changelog = fs.readFileSync(infile);
   assert.match(
     changelog.toString(),
     /# \[1\.1\.0\]\(\/compare\/1\.0\.0\.\.\.1\.1\.0\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*foo:\*\* fix foo [0-9a-f]{7}\n\n\n### Features\n\n\* \*\*bar:\*\* feat bar [0-9a-f]{7}/
   );
-  {
-    const options = { [namespace]: { preset, infile: f }, git };
-    const plugin = factory(Plugin, { namespace, options });
-    sh.exec(`git tag 1.1.0`);
-    const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.1.0');
 
+  {
     add('fix', 'bar');
     add('fix', 'baz');
 
-    await runTasks(plugin);
-    const changelog = fs.readFileSync(f);
+    const options = getOptions({ preset, infile });
+    await runTasks(...options);
+    const changelog = fs.readFileSync(infile);
 
     assert.match(
       changelog.toString(),
       /## \[1\.1\.1\]\(\/compare\/1\.1\.0\.\.\.1\.1\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}\n\* \*\*baz:\*\* fix baz [0-9a-f]{7}\n\n# \[1\.1\.0\]\(\/compare\/1\.0\.0\.\.\.1\.1\.0\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*foo:\*\* fix foo [0-9a-f]{7}\n\n\n### Features\n\n\* \*\*bar:\*\* feat bar [0-9a-f]{7}/
     );
-
-    stub.restore();
   }
 });
 
 test('should reject if conventional bump passes error', async () => {
   setup();
-
-  const options = { [namespace]: { preset: 'what?' }, git };
-  const plugin = factory(Plugin, { namespace, options });
+  const options = getOptions({ preset: 'what?' });
   await assert.rejects(
-    runTasks(plugin),
+    runTasks(...options),
     'Error: Unable to load the "what?" preset package. Please make sure it\'s installed.'
   );
 });
 
 test('should reject if conventional changelog has error', async () => {
-  const options = { [namespace]: { preset: () => {} }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  await assert.rejects(runTasks(plugin), /preset must be string or object with key name/);
+  setup();
+  const options = getOptions({ preset: () => {} });
+  await assert.rejects(runTasks(...options), /preset must be string or object with key name/);
 });
 
 test('should not write infile in dry run', async () => {
   const { dir } = setup();
   const infile = path.join(dir, 'DRYRUN.md');
-  const options = { 'dry-run': true, [namespace]: { preset, infile }, git };
-  const plugin = factory(Plugin, { namespace, options });
-  const spy = sinon.spy(plugin, 'writeChangelog');
-  await runTasks(plugin);
-  assert.equal(spy.callCount, 0);
+  const [config, container] = getOptions({ preset, infile });
+  config['dry-run'] = true;
+  await runTasks(config, container);
   assert.throws(() => fs.readFileSync(infile), /no such file/);
 });
