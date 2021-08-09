@@ -19,9 +19,13 @@ class ConventionalChangelog extends Plugin {
   }
 
   async getChangelog(latestVersion) {
-    const { increment, isPreRelease, preReleaseId } = this.config.getContext('version');
-    const version = await this.getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId });
-    this.setContext({ version });
+    if (!this.config.isIncrement) {
+      this.setContext({ version: latestVersion });
+    } else {
+      const { increment, isPreRelease, preReleaseId } = this.config.getContext('version');
+      const version = await this.getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId });
+      this.setContext({ version });
+    }
     return this.generateChangelog();
   }
 
@@ -56,10 +60,12 @@ class ConventionalChangelog extends Plugin {
 
   getChangelogStream(opts = {}) {
     const { version } = this.getContext();
-    const previousTag = this.config.getContext('latestTag');
-    const tagTemplate = this.options.tagName || ((previousTag || '').match(/^v/) ? 'v${version}' : '${version}');
-    const currentTag = tagTemplate.replace('${version}', version);
-    const options = Object.assign({}, opts, this.options);
+    const { isIncrement } = this.config;
+    const { latestTag, secondLatestTag, tagTemplate } = this.config.getContext();
+    const currentTag = isIncrement ? tagTemplate.replace('${version}', version) : latestTag;
+    const previousTag = isIncrement ? latestTag : secondLatestTag;
+    const releaseCount = opts.releaseCount === 0 ? 0 : isIncrement ? 1 : 2;
+    const options = Object.assign({}, { releaseCount }, this.options);
     const context = { version, previousTag, currentTag };
     const debug = this.config.isDebug ? this.debug : null;
     const gitRawCommitsOpts = { debug };
