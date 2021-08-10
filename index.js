@@ -112,7 +112,7 @@ class ConventionalChangelog extends Plugin {
   }
 
   getIncrementedVersionCI(options) {
-    return this.getIncrementedVersion(options)
+    return this.getIncrementedVersion(options);
   }
 
   async bump(version) {
