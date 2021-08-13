@@ -62,7 +62,7 @@ class ConventionalChangelog extends Plugin {
     const { version } = this.getContext();
     const { isIncrement } = this.config;
     const { latestTag, secondLatestTag, tagTemplate } = this.config.getContext();
-    const currentTag = isIncrement ? tagTemplate.replace('${version}', version) : latestTag;
+    const currentTag = isIncrement ? (tagTemplate ? tagTemplate.replace('${version}', version) : version) : latestTag;
     const previousTag = isIncrement ? latestTag : secondLatestTag;
     const releaseCount = opts.releaseCount === 0 ? 0 : isIncrement ? 1 : 2;
     const options = Object.assign({}, { releaseCount }, this.options);
