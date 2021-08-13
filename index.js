@@ -19,6 +19,7 @@ class ConventionalChangelog extends Plugin {
   }
 
   async getChangelog(latestVersion) {
+    if (latestVersion === null) latestVersion = '0.0.0'
     if (!this.config.isIncrement) {
       this.setContext({ version: latestVersion });
     } else {
