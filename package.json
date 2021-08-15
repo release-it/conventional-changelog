@@ -1,10 +1,10 @@
 {
   "name": "@release-it/conventional-changelog",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Conventional changelog plugin for release-it",
   "main": "index.js",
   "scripts": {
-    "test": "bron test.js",
+    "test": "bron test.js --serial",
     "release": "release-it"
   },
   "keywords": [
@@ -38,11 +38,11 @@
   "devDependencies": {
     "bron": "^1.1.1",
     "proxyquire": "^2.1.0",
-    "release-it": "^14.11.1",
+    "release-it": "^14.11.5",
     "sinon": "^11.1.1"
   },
   "peerDependencies": {
-    "release-it": "^14.11.1"
+    "release-it": "^14.11.5"
   },
   "engines": {
     "node": ">=10"

@@ -13,7 +13,7 @@ class ConventionalChangelog extends Plugin {
   }
 
   getInitialOptions(options, namespace) {
-    const { tagName } = options.git;
+    const tagName = options.git ? options.git.tagName : null;
     options[namespace].tagPrefix = tagName ? tagName.replace(/v?\$\{version\}$/, '') : '';
     return options[namespace];
   }
@@ -62,13 +62,15 @@ class ConventionalChangelog extends Plugin {
     const { version } = this.getContext();
     const { isIncrement } = this.config;
     const { latestTag, secondLatestTag, tagTemplate } = this.config.getContext();
-    const currentTag = isIncrement ? (tagTemplate ? tagTemplate.replace('${version}', version) : version) : latestTag;
+    const currentTag = isIncrement ? (tagTemplate ? tagTemplate.replace('${version}', version) : null) : latestTag;
     const previousTag = isIncrement ? latestTag : secondLatestTag;
     const releaseCount = opts.releaseCount === 0 ? 0 : isIncrement ? 1 : 2;
     const options = Object.assign({}, { releaseCount }, this.options);
-    const context = { version, previousTag, currentTag };
+    const context = Object.assign({ version, previousTag, currentTag }, this.options.context);
     const debug = this.config.isDebug ? this.debug : null;
-    const gitRawCommitsOpts = Object.assign({}, options.gitRawCommitsOpts || {}, { debug });
+    const gitRawCommitsOpts = Object.assign({ debug }, this.options.gitRawCommitsOpts);
+    delete options.context;
+    delete options.gitRawCommitsOpts;
     this.debug('conventionalChangelog', { options, context, gitRawCommitsOpts });
     return conventionalChangelog(options, context, gitRawCommitsOpts);
   }

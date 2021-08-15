@@ -133,6 +133,19 @@ test(`should write and update infile (${infile})`, async t => {
   fs.unlinkSync(infile);
 });
 
+test('should pass context and gitRawCommitsOpts', async t => {
+  conventionalChangelog.resetHistory();
+  const context = { linkCompare: false };
+  const gitRawCommitsOpts = { merges: true };
+  const options = { [namespace]: { preset, context, gitRawCommitsOpts } };
+  const plugin = factory(Plugin, { namespace, options });
+  await runTasks(plugin);
+  const args = conventionalChangelog.args[0];
+  assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
+  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined, linkCompare: false });
+  assert.deepStrictEqual(args[2], { debug: null, merges: true });
+});
+
 test('should reject if conventional bump passes error', async t => {
   const options = { [namespace]: { preset: 'what?' }, git };
   const plugin = factory(Plugin, { namespace, options });
