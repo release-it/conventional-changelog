@@ -24,24 +24,6 @@ Options are passed verbatim to
 and
 [conventional-changelog-core](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#api).
 
-The `context` and/or `gitRawCommitsOpts` options can also be used and will be passed as the respective arguments to
-`conventional-changelog-core`, for example:
-
-```json
-"plugins": {
-  "@release-it/conventional-changelog": {
-    "preset": "angular",
-    "infile": "CHANGELOG.md",
-    "context": {
-      "linkCompare": false
-    },
-    "gitRawCommitsOpts": {
-      "merges": true
-    },
-  }
-}
-```
-
 ### `preset`
 
 Use one of:
@@ -103,21 +85,41 @@ Use `true` to ignore the recommended bump, and use the version provided by relea
 (Note that the changelog preview shows the recommended bump, as the desired version isn't known yet. The `infile` will
 have the correct version.)
 
+### `context`
+
+Default value: `undefined`
+
+This option will be passed as the second argument (`context`) to
+[conventional-changelog-core](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#context),
+for example:
+
+```json
+"plugins": {
+  "@release-it/conventional-changelog": {
+    "context": {
+      "linkCompare": false
+    }
+  }
+}
+```
+
 ### `gitRawCommitsOpts`
 
 Default value: `undefined`
 
-Options for [`git-raw-commits`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/git-raw-commits#gitopts). For example, you can use the following option to include merge commits into changelog:
+Options for
+[`git-raw-commits`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/git-raw-commits#api).
+For example, you can use the following option to include merge commits into changelog:
 
 ```json
 {
-    "plugins": {
-      "@release-it/conventional-changelog": {
-          "gitRawCommitsOpts": {
-              "merges": null
-          }
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "gitRawCommitsOpts": {
+        "merges": null
       }
     }
+  }
 }
 ```
 
