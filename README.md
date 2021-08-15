@@ -22,7 +22,25 @@ In the [release-it](https://github.com/release-it/release-it) config, for exampl
 Options are passed verbatim to
 [conventional-recommended-bump](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-recommended-bump#readme)
 and
-[conventional-changelog](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog#readme).
+[conventional-changelog-core](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#api).
+
+The `context` and/or `gitRawCommitsOpts` options can also be used and will be passed as the respective arguments to
+`conventional-changelog-core`, for example:
+
+```json
+"plugins": {
+  "@release-it/conventional-changelog": {
+    "preset": "angular",
+    "infile": "CHANGELOG.md",
+    "context": {
+      "linkCompare": false
+    },
+    "gitRawCommitsOpts": {
+      "merges": true
+    },
+  }
+}
+```
 
 ### `preset`
 

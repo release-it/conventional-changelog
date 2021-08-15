@@ -4,7 +4,7 @@
   "description": "Conventional changelog plugin for release-it",
   "main": "index.js",
   "scripts": {
-    "test": "bron test.js",
+    "test": "bron test.js --serial",
     "release": "release-it"
   },
   "keywords": [
