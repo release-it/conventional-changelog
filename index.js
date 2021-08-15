@@ -13,7 +13,7 @@ class ConventionalChangelog extends Plugin {
   }
 
   getInitialOptions(options, namespace) {
-    const { tagName } = options.git;
+    const tagName = options.git ? options.git.tagName : null;
     options[namespace].tagPrefix = tagName ? tagName.replace(/v?\$\{version\}$/, '') : '';
     return options[namespace];
   }
