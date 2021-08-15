@@ -85,6 +85,24 @@ Use `true` to ignore the recommended bump, and use the version provided by relea
 (Note that the changelog preview shows the recommended bump, as the desired version isn't known yet. The `infile` will
 have the correct version.)
 
+### `gitRawCommitsOpts`
+
+Default value: `undefined`
+
+Options for [`git-raw-commits`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/git-raw-commits#gitopts). For example, you can use the following option to include merge commits into changelog:
+
+```json
+{
+    "plugins": {
+      "@release-it/conventional-changelog": {
+          "gitRawCommitsOpts": {
+              "merges": null
+          }
+      }
+    }
+}
+```
+
 ## GitHub Actions
 
 When using this plugin in a GitHub Action, make sure to set

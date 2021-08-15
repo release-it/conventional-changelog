@@ -68,7 +68,7 @@ class ConventionalChangelog extends Plugin {
     const options = Object.assign({}, { releaseCount }, this.options);
     const context = { version, previousTag, currentTag };
     const debug = this.config.isDebug ? this.debug : null;
-    const gitRawCommitsOpts = { debug };
+    const gitRawCommitsOpts = Object.assign({}, options.gitRawCommitsOpts || {}, { debug });
     this.debug('conventionalChangelog', { options, context, gitRawCommitsOpts });
     return conventionalChangelog(options, context, gitRawCommitsOpts);
   }

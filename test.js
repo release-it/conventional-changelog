@@ -154,3 +154,15 @@ test('should not write infile in dry run', async t => {
   assert.strictEqual(spy.callCount, 0);
   assert.throws(() => fs.readFileSync(infile), /no such file/);
 });
+
+test('should pass gitRawCommitsOpts into conventionalChangelog', async t => {
+    const gitOpts = { merges: null };
+    const options = { [namespace]: { preset, gitRawCommitsOpts: gitOpts }, git };
+    const plugin = factory(Plugin, { namespace, options });
+    await runTasks(plugin);
+    assert(conventionalChangelog.withArgs(
+        sinon.match.any,
+        sinon.match.any,
+        Object.assign({}, gitOpts, { debug: null }),
+    ).called);
+});
