@@ -123,6 +123,46 @@ For example, you can use the following option to include merge commits into chan
 }
 ```
 
+### `writerOpts`
+
+Default value: `undefined`
+
+Options for
+[`conventional-commits-parser`](https://github.com/conventional-changelog-archived-repos/conventional-commits-parser#api).
+For example, you can use the following option to group the commits by 'scope' instead of 'type' by default.
+
+```json
+{
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "writerOpts": {
+        "groupBy:" "scope"
+      }
+    }
+  }
+}
+```
+
+### `parserOpts`
+
+Default value: `undefined`
+
+Options for
+[`conventional-commits-parser`](https://github.com/conventional-changelog-archived-repos/conventional-commits-parser#api).
+For example, you can use the following option to set the merge pattern during parsing commit message:
+
+```json
+{
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "parserOpts": {
+        "mergePattern": /^Merge pull request #(\d+) from (.*)$/
+      }
+    }
+  }
+}
+```
+
 ## GitHub Actions
 
 When using this plugin in a GitHub Action, make sure to set
