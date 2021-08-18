@@ -191,7 +191,7 @@ test('should pass only parserOpts', async t => {
 test('should pass only writerOpts', async t => {
   conventionalChangelog.resetHistory();
   const writerOpts = {
-    groupBy: 'type'
+    groupBy: 'scope'
   };
   const options = { [namespace]: { preset, writerOpts } };
   const plugin = factory(Plugin, { namespace, options });
@@ -202,7 +202,7 @@ test('should pass only writerOpts', async t => {
   assert.deepStrictEqual(args[2], { debug: null });
   assert.deepStrictEqual(args[3], undefined)
   assert.deepStrictEqual(args[4], {
-    groupBy: 'type'
+    groupBy: 'scope'
   });
 });
 
