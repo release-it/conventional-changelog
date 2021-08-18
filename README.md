@@ -123,12 +123,32 @@ For example, you can use the following option to include merge commits into chan
 }
 ```
 
+### `parserOpts`
+
+Default value: `undefined`
+
+Options for
+[`conventional-commits-parser`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-commits-parser#api).
+For example, you can use the following option to set the merge pattern during parsing the commit message:
+
+```json
+{
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "parserOpts": {
+        "mergePattern": /^Merge pull request #(\d+) from (.*)$/
+      }
+    }
+  }
+}
+```
+
 ### `writerOpts`
 
 Default value: `undefined`
 
 Options for
-[`conventional-commits-parser`](https://github.com/conventional-changelog-archived-repos/conventional-commits-parser#api).
+[`conventional-changelog-writer`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer#api).
 For example, you can use the following option to group the commits by 'scope' instead of 'type' by default.
 
 ```json
@@ -137,26 +157,6 @@ For example, you can use the following option to group the commits by 'scope' in
     "@release-it/conventional-changelog": {
       "writerOpts": {
         "groupBy:" "scope"
-      }
-    }
-  }
-}
-```
-
-### `parserOpts`
-
-Default value: `undefined`
-
-Options for
-[`conventional-commits-parser`](https://github.com/conventional-changelog-archived-repos/conventional-commits-parser#api).
-For example, you can use the following option to set the merge pattern during parsing commit message:
-
-```json
-{
-  "plugins": {
-    "@release-it/conventional-changelog": {
-      "parserOpts": {
-        "mergePattern": /^Merge pull request #(\d+) from (.*)$/
       }
     }
   }
