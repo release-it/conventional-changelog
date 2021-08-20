@@ -136,7 +136,7 @@ For example, you can use the following option to set the merge pattern during pa
   "plugins": {
     "@release-it/conventional-changelog": {
       "parserOpts": {
-        "mergePattern": /^Merge pull request #(\d+) from (.*)$/
+        "mergePattern": "^Merge pull request #(\\d+) from (.*)$"
       }
     }
   }
