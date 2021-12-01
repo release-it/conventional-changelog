@@ -22,7 +22,7 @@ In the [release-it](https://github.com/release-it/release-it) config, for exampl
 Options are passed verbatim to
 [conventional-recommended-bump](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-recommended-bump#readme)
 and
-[conventional-changelog](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog#readme).
+[conventional-changelog-core](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#api).
 
 ### `preset`
 
@@ -84,6 +84,84 @@ Use `true` to ignore the recommended bump, and use the version provided by relea
 
 (Note that the changelog preview shows the recommended bump, as the desired version isn't known yet. The `infile` will
 have the correct version.)
+
+### `context`
+
+Default value: `undefined`
+
+This option will be passed as the second argument (`context`) to
+[conventional-changelog-core](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#context),
+for example:
+
+```json
+"plugins": {
+  "@release-it/conventional-changelog": {
+    "context": {
+      "linkCompare": false
+    }
+  }
+}
+```
+
+### `gitRawCommitsOpts`
+
+Default value: `undefined`
+
+Options for
+[`git-raw-commits`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/git-raw-commits#api).
+For example, you can use the following option to include merge commits into changelog:
+
+```json
+{
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "gitRawCommitsOpts": {
+        "merges": null
+      }
+    }
+  }
+}
+```
+
+### `parserOpts`
+
+Default value: `undefined`
+
+Options for
+[`conventional-commits-parser`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-commits-parser#api).
+For example, you can use the following option to set the merge pattern during parsing the commit message:
+
+```json
+{
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "parserOpts": {
+        "mergePattern": "^Merge pull request #(\\d+) from (.*)$"
+      }
+    }
+  }
+}
+```
+
+### `writerOpts`
+
+Default value: `undefined`
+
+Options for
+[`conventional-changelog-writer`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer#api).
+For example, you can use the following option to group the commits by 'scope' instead of 'type' by default.
+
+```json
+{
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "writerOpts": {
+        "groupBy:" "scope"
+      }
+    }
+  }
+}
+```
 
 ## GitHub Actions
 

@@ -247,3 +247,66 @@ test('should not write infile in dry run', async () => {
   await runTasks(config, container);
   assert.throws(() => fs.readFileSync(infile), /no such file/);
 });
+
+test('should pass only parserOpts', async t => {
+  conventionalChangelog.resetHistory();
+  const parserOpts = {
+    mergePattern: /^Merge pull request #(\d+) from (.*)$/,
+    mergeCorrespondence: ['id', 'source']
+  };
+  const options = { [namespace]: { preset, parserOpts } };
+  const plugin = factory(Plugin, { namespace, options });
+  await runTasks(plugin);
+  const args = conventionalChangelog.args[0];
+  assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
+  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
+  assert.deepStrictEqual(args[2], { debug: null });
+  assert.deepStrictEqual(args[3], {
+    mergePattern: /^Merge pull request #(\d+) from (.*)$/,
+    mergeCorrespondence: ['id', 'source']
+  });
+  assert.deepStrictEqual(args[4], undefined);
+});
+
+test('should pass only writerOpts', async t => {
+  conventionalChangelog.resetHistory();
+  const writerOpts = {
+    groupBy: 'scope'
+  };
+  const options = { [namespace]: { preset, writerOpts } };
+  const plugin = factory(Plugin, { namespace, options });
+  await runTasks(plugin);
+  const args = conventionalChangelog.args[0];
+  assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
+  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
+  assert.deepStrictEqual(args[2], { debug: null });
+  assert.deepStrictEqual(args[3], undefined);
+  assert.deepStrictEqual(args[4], {
+    groupBy: 'scope'
+  });
+});
+
+test('should pass parserOpts and writerOpts', async t => {
+  conventionalChangelog.resetHistory();
+  const parserOpts = {
+    mergePattern: /^Merge pull request #(\d+) from (.*)$/,
+    mergeCorrespondence: ['id', 'source']
+  };
+  const writerOpts = {
+    groupBy: 'type'
+  };
+  const options = { [namespace]: { preset, parserOpts, writerOpts } };
+  const plugin = factory(Plugin, { namespace, options });
+  await runTasks(plugin);
+  const args = conventionalChangelog.args[0];
+  assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
+  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
+  assert.deepStrictEqual(args[2], { debug: null });
+  assert.deepStrictEqual(args[3], {
+    mergePattern: /^Merge pull request #(\d+) from (.*)$/,
+    mergeCorrespondence: ['id', 'source']
+  });
+  assert.deepStrictEqual(args[4], {
+    groupBy: 'type'
+  });
+});
