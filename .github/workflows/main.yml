@@ -1,0 +1,36 @@
+name: "Tests"
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ["12", "14", "16", "17"]
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Setup node ${{ matrix.node-version }}
+        uses: actions/setup-node@v2.5.0
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v2.1.7
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ubuntu-latest-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ubuntu-latest-node-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
