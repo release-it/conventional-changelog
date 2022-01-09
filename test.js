@@ -65,35 +65,35 @@ test('should ignore recommended bump (option)', async t => {
   assert.strictEqual(version, '1.0.1');
 });
 
-test('should ignore recommended bump (prelease)', async t => {
+test('should use provided pre-release id', async t => {
   const options = { preRelease: 'alpha', [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const { version } = plugin.config.getContext();
-  assert.strictEqual(version, '1.0.1-alpha.0');
+  assert.strictEqual(version, '1.1.0-alpha.0');
 });
 
-test('should ignore recommended bump (prelease continuation)', async t => {
+test('should use provided pre-release id (prelease continuation)', async t => {
   const options = { preRelease: 'alpha', [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
-  const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.0.1-alpha.0');
+  const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.1.0-alpha.0');
   await runTasks(plugin);
   const { version } = plugin.config.getContext();
-  assert.strictEqual(version, '1.0.1-alpha.1');
+  assert.strictEqual(version, '1.1.0-alpha.1');
   stub.restore();
 });
 
-test('should ignore recommended bump (next prelease)', async t => {
+test('should use provided pre-release id (next pre-release)', async t => {
   const options = { preRelease: 'beta', [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
-  const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.0.1-alpha.1');
+  const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.1.0-alpha.1');
   await runTasks(plugin);
   const { version } = plugin.config.getContext();
-  assert.strictEqual(version, '1.0.1-beta.0');
+  assert.strictEqual(version, '1.1.0-beta.0');
   stub.restore();
 });
 
-test('should use recommended bump (from prelease)', async t => {
+test('should use recommended bump (after pre-rerelease)', async t => {
   const options = { [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
   const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.0.1-beta.0');
