@@ -69,7 +69,7 @@ class ConventionalChangelog extends Plugin {
     const context = Object.assign({ version, previousTag, currentTag }, this.options.context);
     const debug = this.config.isDebug ? this.debug : null;
     const gitRawCommitsOpts = Object.assign({ debug }, this.options.gitRawCommitsOpts);
-    const { parserOpts, writerOpts } = options
+    const { parserOpts, writerOpts } = options;
     delete options.context;
     delete options.gitRawCommitsOpts;
     delete options.parserOpts;

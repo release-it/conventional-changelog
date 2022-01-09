@@ -185,7 +185,7 @@ test('should pass only parserOpts', async t => {
     mergePattern: /^Merge pull request #(\d+) from (.*)$/,
     mergeCorrespondence: ['id', 'source']
   });
-  assert.deepStrictEqual(args[4], undefined)
+  assert.deepStrictEqual(args[4], undefined);
 });
 
 test('should pass only writerOpts', async t => {
@@ -200,7 +200,7 @@ test('should pass only writerOpts', async t => {
   assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
   assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
   assert.deepStrictEqual(args[2], { debug: null });
-  assert.deepStrictEqual(args[3], undefined)
+  assert.deepStrictEqual(args[3], undefined);
   assert.deepStrictEqual(args[4], {
     groupBy: 'scope'
   });
