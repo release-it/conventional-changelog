@@ -31,18 +31,18 @@
   },
   "dependencies": {
     "concat-stream": "^2.0.0",
-    "conventional-changelog": "^3.1.24",
+    "conventional-changelog": "^3.1.25",
     "conventional-recommended-bump": "^6.1.0",
     "prepend-file": "^2.0.0"
   },
   "devDependencies": {
     "bron": "^1.1.1",
     "proxyquire": "^2.1.0",
-    "release-it": "^14.11.5",
+    "release-it": "^14.12.1",
     "sinon": "^11.1.1"
   },
   "peerDependencies": {
-    "release-it": "^14.11.5"
+    "release-it": "^14.12.1"
   },
   "engines": {
     "node": ">=10"
