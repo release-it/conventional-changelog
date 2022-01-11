@@ -73,7 +73,7 @@ test('should use provided pre-release id', async t => {
   assert.strictEqual(version, '1.1.0-alpha.0');
 });
 
-test('should use provided pre-release id (prelease continuation)', async t => {
+test('should use provided pre-release id (pre-release continuation)', async t => {
   const options = { preRelease: 'alpha', [namespace]: { preset }, git };
   const plugin = factory(Plugin, { namespace, options });
   const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.1.0-alpha.0');
@@ -100,6 +100,16 @@ test('should use recommended bump (after pre-rerelease)', async t => {
   await runTasks(plugin);
   const { version } = plugin.config.getContext();
   assert.strictEqual(version, '1.1.0');
+  stub.restore();
+});
+
+test('should follow true semver (pre-release continuation)', async t => {
+  const options = { preRelease: 'alpha', [namespace]: { preset, strictSemVer: true }, git };
+  const plugin = factory(Plugin, { namespace, options });
+  const stub = sinon.stub(plugin, 'getLatestVersion').returns('1.1.0-alpha.0');
+  await runTasks(plugin);
+  const { version } = plugin.config.getContext();
+  assert.strictEqual(version, '1.2.0-alpha.0');
   stub.restore();
 });
 

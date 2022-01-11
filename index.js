@@ -47,7 +47,10 @@ class ConventionalChangelog extends Plugin {
         if (increment && semver.valid(increment)) {
           resolve(increment);
         } else if (isPreRelease) {
-          const type = releaseType && !semver.prerelease(latestVersion) ? `pre${releaseType}` : 'prerelease';
+          const type =
+            releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))
+              ? `pre${releaseType}`
+              : 'prerelease';
           resolve(semver.inc(latestVersion, type, preReleaseId));
         } else if (releaseType) {
           resolve(semver.inc(latestVersion, releaseType, preReleaseId));

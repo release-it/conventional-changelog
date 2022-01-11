@@ -85,6 +85,15 @@ Use `true` to ignore the recommended bump, and use the version provided by relea
 (Note that the changelog preview shows the recommended bump, as the desired version isn't known yet. The `infile` will
 have the correct version.)
 
+### `strictSemVer`
+
+Default value: `false`
+
+Use `true` to strictly follow semver, also in consecutive pre-releases. This means that from a pre-release, a
+recommended bump will result in a next pre-release for the next version. For example, from `1.0.0-alpha.0` a recommended
+bump of `minor` will result in a `preminor` bump to `1.1.0-alpha.0` (whereas the default behavior without this flag
+results in a `prerelease` bump to `1.0.0-alpha.1`).
+
 ### `context`
 
 Default value: `undefined`
