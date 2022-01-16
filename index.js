@@ -69,17 +69,13 @@ class ConventionalChangelog extends Plugin {
     const currentTag = isIncrement ? (tagTemplate ? tagTemplate.replace('${version}', version) : null) : latestTag;
     const previousTag = isIncrement ? latestTag : secondLatestTag;
     const releaseCount = opts.releaseCount === 0 ? 0 : isIncrement ? 1 : 2;
-    const options = Object.assign({}, { releaseCount }, this.options);
-    const context = Object.assign({ version, previousTag, currentTag }, this.options.context);
     const debug = this.config.isDebug ? this.debug : null;
-    const gitRawCommitsOpts = Object.assign({ debug }, this.options.gitRawCommitsOpts);
-    const { parserOpts, writerOpts } = options;
-    delete options.context;
-    delete options.gitRawCommitsOpts;
-    delete options.parserOpts;
-    delete options.writerOpts;
-    this.debug('conventionalChangelog', { options, context, gitRawCommitsOpts, parserOpts, writerOpts });
-    return conventionalChangelog(options, context, gitRawCommitsOpts, parserOpts, writerOpts);
+    const options = Object.assign({}, { releaseCount }, this.options);
+    const { context, gitRawCommitsOpts, parserOpts, writerOpts, ..._o } = options;
+    const _c = Object.assign({ version, previousTag, currentTag }, context);
+    const _r = Object.assign({ debug }, gitRawCommitsOpts);
+    this.debug('conventionalChangelog', { options: _o, context: _c, gitRawCommitsOpts: _r, parserOpts, writerOpts });
+    return conventionalChangelog(_o, _c, _r, parserOpts, writerOpts);
   }
 
   generateChangelog(options) {
