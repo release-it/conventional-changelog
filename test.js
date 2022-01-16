@@ -130,7 +130,7 @@ test('should ignore recommended bump (option)', async () => {
   assert.equal(version, '1.0.1');
 });
 
-test('should ignore recommended bump for pre-release', async () => {
+test('should use provided pre-release id', async t => {
   setup();
   sh.exec(`git tag 1.0.0`);
   add('feat', 'baz');
@@ -138,10 +138,10 @@ test('should ignore recommended bump for pre-release', async () => {
   const [config, container] = getOptions({ preset });
   config.preRelease = 'alpha';
   const { version } = await runTasks(config, container);
-  assert.equal(version, '1.0.1-alpha.0');
+  assert.equal(version, '1.1.0-alpha.0');
 });
 
-test('should ignore recommended bump for pre-release continuation', async () => {
+test('should use provided pre-release id (pre-release continuation)', async t => {
   setup();
   sh.exec(`git tag 1.0.1-alpha.0`);
   add('feat', 'baz');
@@ -152,18 +152,17 @@ test('should ignore recommended bump for pre-release continuation', async () => 
   assert.equal(version, '1.0.1-alpha.1');
 });
 
-test('should ignore recommended bump for next pre-release id', async () => {
+test('should use provided pre-release id (next pre-release)', async t => {
   setup();
-  sh.exec(`git tag 1.0.1-alpha.1`);
+  sh.exec(`git tag 1.1.0-alpha.1`);
 
   const [config, container] = getOptions({ preset });
   config.preRelease = 'beta';
   const { version } = await runTasks(config, container);
-  assert.equal(version, '1.0.1-beta.0');
-  sh.popd();
+  assert.equal(version, '1.1.0-beta.0');
 });
 
-test('should use recommended bump from pre-release', async () => {
+test('should use recommended bump (after pre-rerelease)', async t => {
   setup();
   sh.exec(`git tag 1.0.1-beta.0`);
   add('feat', 'baz');
@@ -171,7 +170,17 @@ test('should use recommended bump from pre-release', async () => {
   const options = getOptions({ preset });
   const { version } = await runTasks(...options);
   assert.equal(version, '1.1.0');
-  sh.popd();
+});
+
+test('should follow true semver (pre-release continuation)', async t => {
+  setup();
+  sh.exec(`git tag 1.1.0-alpha.0`);
+  add('feat', 'baz');
+
+  const [config, container] = getOptions({ preset, strictSemVer: true });
+  config.preRelease = 'alpha';
+  const { version } = await runTasks(config, container);
+  assert.equal(version, '1.2.0-alpha.0');
 });
 
 test('should use provided increment', async () => {
@@ -248,46 +257,9 @@ test('should not write infile in dry run', async () => {
   assert.throws(() => fs.readFileSync(infile), /no such file/);
 });
 
-test('should pass only parserOpts', async t => {
-  conventionalChangelog.resetHistory();
-  const parserOpts = {
-    mergePattern: /^Merge pull request #(\d+) from (.*)$/,
-    mergeCorrespondence: ['id', 'source']
-  };
-  const options = { [namespace]: { preset, parserOpts } };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const args = conventionalChangelog.args[0];
-  assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
-  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
-  assert.deepStrictEqual(args[2], { debug: null });
-  assert.deepStrictEqual(args[3], {
-    mergePattern: /^Merge pull request #(\d+) from (.*)$/,
-    mergeCorrespondence: ['id', 'source']
-  });
-  assert.deepStrictEqual(args[4], undefined);
-});
-
-test('should pass only writerOpts', async t => {
-  conventionalChangelog.resetHistory();
-  const writerOpts = {
-    groupBy: 'scope'
-  };
-  const options = { [namespace]: { preset, writerOpts } };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const args = conventionalChangelog.args[0];
-  assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
-  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
-  assert.deepStrictEqual(args[2], { debug: null });
-  assert.deepStrictEqual(args[3], undefined);
-  assert.deepStrictEqual(args[4], {
-    groupBy: 'scope'
-  });
-});
-
-test('should pass parserOpts and writerOpts', async t => {
-  conventionalChangelog.resetHistory();
+// TODO Prepare test and verify results influenced by parserOpts and writerOpts
+test.skip('should pass parserOpts and writerOpts', async t => {
+  setup();
   const parserOpts = {
     mergePattern: /^Merge pull request #(\d+) from (.*)$/,
     mergeCorrespondence: ['id', 'source']
@@ -295,18 +267,6 @@ test('should pass parserOpts and writerOpts', async t => {
   const writerOpts = {
     groupBy: 'type'
   };
-  const options = { [namespace]: { preset, parserOpts, writerOpts } };
-  const plugin = factory(Plugin, { namespace, options });
-  await runTasks(plugin);
-  const args = conventionalChangelog.args[0];
-  assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
-  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
-  assert.deepStrictEqual(args[2], { debug: null });
-  assert.deepStrictEqual(args[3], {
-    mergePattern: /^Merge pull request #(\d+) from (.*)$/,
-    mergeCorrespondence: ['id', 'source']
-  });
-  assert.deepStrictEqual(args[4], {
-    groupBy: 'type'
-  });
+  const [config, container] = getOptions({ preset, parserOpts, writerOpts });
+  await runTasks(config, container);
 });

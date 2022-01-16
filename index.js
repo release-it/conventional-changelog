@@ -47,7 +47,10 @@ class ConventionalChangelog extends Plugin {
         if (increment && semver.valid(increment)) {
           resolve(increment);
         } else if (isPreRelease) {
-          const type = increment ? `pre${releaseType}` : 'prerelease';
+          const type =
+            releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))
+              ? `pre${releaseType}`
+              : 'prerelease';
           resolve(semver.inc(latestVersion, type, preReleaseId));
         } else if (releaseType) {
           resolve(semver.inc(latestVersion, releaseType, preReleaseId));
@@ -69,7 +72,7 @@ class ConventionalChangelog extends Plugin {
     const context = Object.assign({ version, previousTag, currentTag }, this.options.context);
     const debug = this.config.isDebug ? this.debug : null;
     const gitRawCommitsOpts = Object.assign({ debug }, this.options.gitRawCommitsOpts);
-    const { parserOpts, writerOpts } = options
+    const { parserOpts, writerOpts } = options;
     delete options.context;
     delete options.gitRawCommitsOpts;
     delete options.parserOpts;
