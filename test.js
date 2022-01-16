@@ -58,6 +58,13 @@ const setup = () => {
   return { dir };
 };
 
+const date = /\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/.source;
+const sha = /[0-9a-f]{7}/.source;
+const header = (from, to, version) => `# \\[${version || to}\\]\\(/compare/${from}...${to}\\) ${date}`;
+const features = '\\n\\n\\n### Features\\n';
+const fixes = '\\n\\n\\n### Bug Fixes\\n';
+const commit = (type, name) => `\\n\\* \\*\\*${name}:\\*\\* ${type} ${name} ${sha}`;
+
 test('should generate changelog using recommended bump (minor)', async () => {
   setup();
 
@@ -67,10 +74,10 @@ test('should generate changelog using recommended bump (minor)', async () => {
 
   const options = getOptions({ preset });
   const { changelog } = await runTasks(...options);
-  assert.match(
-    changelog,
-    /# \[1\.1\.0\]\(\/compare\/1\.0\.0\.\.\.1\.1\.0\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}\n\n\n### Features\n\n\* \*\*baz:\*\* feat baz [0-9a-f]{7}/
-  );
+  const title = header('1.0.0', '1.1.0');
+  const bar = commit('fix', 'bar');
+  const baz = commit('feat', 'baz');
+  assert.match(changelog, new RegExp(title + fixes + bar + features + baz));
 });
 
 test('should generate changelog using recommended bump (patch)', async () => {
@@ -82,10 +89,10 @@ test('should generate changelog using recommended bump (patch)', async () => {
 
   const options = getOptions({ preset });
   const { changelog } = await runTasks(...options);
-  assert.match(
-    changelog,
-    /# \[1\.0\.1\]\(\/compare\/1\.0\.0\.\.\.1\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}\n\* \*\*baz:\*\* fix baz [0-9a-f]{7}/
-  );
+  const title = header('1.0.0', '1.0.1');
+  const bar = commit('fix', 'bar');
+  const baz = commit('fix', 'baz');
+  assert.match(changelog, new RegExp(title + fixes + bar + baz));
 });
 
 test('should support tag prefix', async () => {
@@ -101,23 +108,29 @@ test('should support tag prefix', async () => {
     changelog,
     /# \[2\.0\.1\]\(\/compare\/next-2\.0\.0\.\.\.next-2\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}/
   );
+  const title = header('next-2.0.0', 'next-2.0.1', '2.0.1');
+  const bar = commit('fix', 'bar');
+  assert.match(changelog, new RegExp(title + fixes + bar));
 });
 
 test('should respect --no-increment and return previous, identical changelog', async () => {
   setup();
 
   sh.exec(`git tag 1.0.0`);
-  add('fix', 'bar');
+  add('feat', 'bar');
   add('fix', 'baz');
-  sh.exec(`git tag 1.0.1`);
+  sh.exec(`git tag 1.1.0`);
+  add('fix', 'bar');
+  add('feat', 'baz');
+  sh.exec(`git tag 1.2.0`);
 
   const [config, container] = getOptions({ preset });
   config.increment = false;
   const { changelog } = await runTasks(config, container);
-  assert.match(
-    changelog,
-    /# \[1\.0\.1\]\(\/compare\/1\.0\.0\.\.\.1\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}\n\* \*\*baz:\*\* fix baz [0-9a-f]{7}/
-  );
+  const title = header('1.1.0', '1.2.0');
+  const bar = commit('fix', 'bar');
+  const baz = commit('feat', 'baz');
+  assert.match(changelog, new RegExp(title + fixes + bar + features + baz));
 });
 
 test('should ignore recommended bump (option)', async () => {
@@ -212,23 +225,24 @@ test(`should write and update infile`, async () => {
   const [config, container] = getOptions({ preset, infile });
   config.git.tag = true;
   await runTasks(config, container);
-  const changelog = fs.readFileSync(infile);
-  assert.match(
-    changelog.toString(),
-    /# \[1\.1\.0\]\(\/compare\/1\.0\.0\.\.\.1\.1\.0\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*foo:\*\* fix foo [0-9a-f]{7}\n\n\n### Features\n\n\* \*\*bar:\*\* feat bar [0-9a-f]{7}/
-  );
-
+  const changelog = fs.readFileSync(infile).toString();
+  const title = header('1.0.0', '1.1.0');
+  const fix1 = commit('fix', 'foo');
+  const feat1 = commit('feat', 'bar');
+  assert.match(changelog, new RegExp(title + fixes + fix1 + features + feat1));
   {
     add('fix', 'bar');
     add('fix', 'baz');
 
     const options = getOptions({ preset, infile });
     await runTasks(...options);
-    const changelog = fs.readFileSync(infile);
-
+    const changelog = fs.readFileSync(infile).toString();
+    const title2 = header('1.1.0', '1.1.1');
+    const fix2 = commit('fix', 'bar');
+    const fix3 = commit('fix', 'baz');
     assert.match(
-      changelog.toString(),
-      /## \[1\.1\.1\]\(\/compare\/1\.1\.0\.\.\.1\.1\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}\n\* \*\*baz:\*\* fix baz [0-9a-f]{7}\n\n# \[1\.1\.0\]\(\/compare\/1\.0\.0\.\.\.1\.1\.0\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*foo:\*\* fix foo [0-9a-f]{7}\n\n\n### Features\n\n\* \*\*bar:\*\* feat bar [0-9a-f]{7}/
+      changelog,
+      new RegExp(title2 + fixes + fix2 + fix3 + '\\n\\n' + title + fixes + fix1 + features + feat1)
     );
   }
 });
