@@ -172,6 +172,25 @@ For example, you can use the following option to group the commits by 'scope' in
 }
 ```
 
+If you want to customize the templates used to write the changelog, you can do it like in a ``.release-it.js`` file like so:
+
+```js
+const fs = require("fs");
+
+const commitTemplate = fs.readFileSync("commit.hbs").toString();
+
+module.exports = {
+    plugins: {
+        "@release-it/conventional-changelog": {
+            writerOpts: {
+                commitPartial: commitTemplate,
+            },
+        },
+    },
+};
+```
+
+
 ## GitHub Actions
 
 When using this plugin in a GitHub Action, make sure to set
