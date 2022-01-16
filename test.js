@@ -215,6 +215,18 @@ test('should use provided version (ignore recommended bump)', async () => {
   assert.equal(version, '1.2.3');
 });
 
+test('should not throw with Git plugin disabled', async () => {
+  setup();
+
+  const [config, container] = getOptions({ preset });
+  config.git = false;
+  const { version, changelog } = await runTasks(config, container);
+  assert.equal(version, '0.0.1');
+  const title = `## 0.0.1 ${date}`;
+  const fix = commit('fix', 'foo');
+  assert.match(changelog, new RegExp(title + fixes + fix));
+});
+
 test(`should write and update infile`, async () => {
   const { dir } = setup();
   sh.exec(`git tag 1.0.0`);
