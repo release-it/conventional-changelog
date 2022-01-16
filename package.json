@@ -1,6 +1,6 @@
 {
   "name": "@release-it/conventional-changelog",
-  "version": "4.1.0",
+  "version": "5.0.0-esm.0",
   "description": "Conventional changelog plugin for release-it",
   "type": "module",
   "exports": "./index.js",
