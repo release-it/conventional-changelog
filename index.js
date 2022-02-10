@@ -115,7 +115,7 @@ class ConventionalChangelog extends Plugin {
     let oldChangelog = ""
     try{
       oldChangelog = await this.getOldChangelog();
-      oldChangelog = oldChangelog.replace(new RegExp(EOL, 'g'), '\n').replace(header, '');
+      oldChangelog = oldChangelog.replace(header, '');
     }catch(err){
       this.debug(err);
     }
@@ -125,7 +125,7 @@ class ConventionalChangelog extends Plugin {
       this.debug({ changelog });
     }
 
-    fs.writeFileSync(infile, header + EOL + EOL + changelog + EOL + EOL + oldChangelog);
+    fs.writeFileSync(infile, header + EOL + EOL + changelog + oldChangelog);
 
     if (!hasInfile) {
       await this.exec(`git add ${infile}`);
