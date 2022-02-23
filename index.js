@@ -115,7 +115,7 @@ class ConventionalChangelog extends Plugin {
     let oldChangelog = ""
     try{
       oldChangelog = await this.getOldChangelog();
-      oldChangelog = oldChangelog.replace(header, '');
+      oldChangelog = oldChangelog.replace(header.split(/\r\n|\r|\n/g).join(EOL), '');
     }catch(err){
       this.debug(err);
     }
