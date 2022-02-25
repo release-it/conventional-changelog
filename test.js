@@ -130,15 +130,16 @@ test('should use provided version', async t => {
 });
 
 test(`should write and update infile (${infile})`, async t => {
-  const options = { [namespace]: { preset, infile }, git };
+  const header = "The header"
+  const options = { [namespace]: { preset, infile, header }, git };
   const plugin = factory(Plugin, { namespace, options });
   await runTasks(plugin);
   const changelog = fs.readFileSync(infile);
-  assert.strictEqual(changelog.toString().trim(), 'The changelog');
+  assert.strictEqual(changelog.toString().trim(), `${header}${EOL}${EOL}The changelog`);
   {
     await runTasks(plugin);
     const changelog = fs.readFileSync(infile);
-    assert.strictEqual(changelog.toString().trim(), `The changelog${EOL}${EOL}The changelog`);
+    assert.strictEqual(changelog.toString().trim(), `${header}${EOL}${EOL}The changelog${EOL}${EOL}The changelog`);
   }
   fs.unlinkSync(infile);
 });
