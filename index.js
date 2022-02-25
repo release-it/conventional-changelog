@@ -90,7 +90,7 @@ class ConventionalChangelog extends Plugin {
     });
   }
 
-  getOldChangelog() {
+  getPreviousChangelog() {
     const { infile } = this.options;
     return new Promise((resolve, reject) => {
       const readStream = fs.createReadStream(infile);
@@ -112,11 +112,11 @@ class ConventionalChangelog extends Plugin {
       this.debug(err);
     }
 
-    let oldChangelog = ""
-    try{
-      oldChangelog = await this.getOldChangelog();
-      oldChangelog = oldChangelog.replace(header.split(/\r\n|\r|\n/g).join(EOL), '');
-    }catch(err){
+    let previousChangelog = '';
+    try {
+      previousChangelog = await this.getPreviousChangelog();
+      previousChangelog = previousChangelog.replace(header.split(/\r\n|\r|\n/g).join(EOL), '');
+    } catch (err) {
       this.debug(err);
     }
 
@@ -125,7 +125,7 @@ class ConventionalChangelog extends Plugin {
       this.debug({ changelog });
     }
 
-    fs.writeFileSync(infile, header + EOL + EOL + changelog + oldChangelog);
+    fs.writeFileSync(infile, header + EOL + EOL + changelog + previousChangelog);
 
     if (!hasInfile) {
       await this.exec(`git add ${infile}`);
