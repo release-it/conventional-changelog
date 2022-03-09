@@ -101,8 +101,9 @@ class ConventionalChangelog extends Plugin {
   }
 
   async writeChangelog() {
-    const { infile, header } = this.options;
+    const { infile, header: _header } = this.options;
     let { changelog } = this.config.getContext();
+    const header = _header.split(/\r\n|\r|\n/g).join(EOL);
 
     let hasInfile = false;
     try {
@@ -115,7 +116,7 @@ class ConventionalChangelog extends Plugin {
     let previousChangelog = '';
     try {
       previousChangelog = await this.getPreviousChangelog();
-      previousChangelog = previousChangelog.replace(header.split(/\r\n|\r|\n/g).join(EOL), '');
+      previousChangelog = previousChangelog.replace(header, '');
     } catch (err) {
       this.debug(err);
     }
