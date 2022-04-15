@@ -7,6 +7,10 @@ const stream = require('stream');
 const fs = require('fs');
 const { factory, runTasks } = require('release-it/test/util');
 
+try {
+  fs.unlinkSync('CHANGES.md');
+} catch (error) {}
+
 const conventionalRecommendedBump = sinon.stub().callsFake((options, cb) => {
   if (options.preset === 'angular') return cb(null, { releaseType: 'minor' });
   cb(new Error('Something went wrong'));
