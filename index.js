@@ -126,7 +126,12 @@ class ConventionalChangelog extends Plugin {
       this.debug({ changelog });
     }
 
-    fs.writeFileSync(infile, header + EOL + EOL + changelog + previousChangelog);
+    fs.writeFileSync(
+      infile,
+      header +
+        (changelog ? EOL + EOL + changelog.trim() : '') +
+        (previousChangelog ? EOL + EOL + previousChangelog.trim() : '')
+    );
 
     if (!hasInfile) {
       await this.exec(`git add ${infile}`);
