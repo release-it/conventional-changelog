@@ -157,7 +157,7 @@ test('should pass context and gitRawCommitsOpts', async t => {
   const args = conventionalChangelog.args[0];
   assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
   assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined, linkCompare: false });
-  assert.deepStrictEqual(args[2], { debug: null, merges: true });
+  assert.deepStrictEqual(args[2], { debug: null, merges: true, from: undefined });
 });
 
 test('should reject if conventional bump passes error', async t => {
@@ -194,7 +194,7 @@ test('should pass only parserOpts', async t => {
   const args = conventionalChangelog.args[0];
   assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
   assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
-  assert.deepStrictEqual(args[2], { debug: null });
+  assert.deepStrictEqual(args[2], { debug: null, from: undefined });
   assert.deepStrictEqual(args[3], {
     mergePattern: /^Merge pull request #(\d+) from (.*)$/,
     mergeCorrespondence: ['id', 'source']
@@ -213,7 +213,7 @@ test('should pass only writerOpts', async t => {
   const args = conventionalChangelog.args[0];
   assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
   assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
-  assert.deepStrictEqual(args[2], { debug: null });
+  assert.deepStrictEqual(args[2], { debug: null, from: undefined });
   assert.deepStrictEqual(args[3], undefined);
   assert.deepStrictEqual(args[4], {
     groupBy: 'scope'
@@ -231,11 +231,12 @@ test('should pass parserOpts and writerOpts', async t => {
   };
   const options = { [namespace]: { preset, parserOpts, writerOpts } };
   const plugin = factory(Plugin, { namespace, options });
+  plugin.config.setContext({ latestTag: '1.1.0' });
   await runTasks(plugin);
   const args = conventionalChangelog.args[0];
   assert.deepStrictEqual(args[0], { releaseCount: 1, preset: 'angular', tagPrefix: '' });
-  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: undefined });
-  assert.deepStrictEqual(args[2], { debug: null });
+  assert.deepStrictEqual(args[1], { version: '1.1.0', currentTag: null, previousTag: '1.1.0' });
+  assert.deepStrictEqual(args[2], { debug: null, from: '1.1.0' });
   assert.deepStrictEqual(args[3], {
     mergePattern: /^Merge pull request #(\d+) from (.*)$/,
     mergeCorrespondence: ['id', 'source']
