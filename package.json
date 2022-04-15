@@ -32,8 +32,7 @@
   "dependencies": {
     "concat-stream": "^2.0.0",
     "conventional-changelog": "^3.1.25",
-    "conventional-recommended-bump": "^6.1.0",
-    "prepend-file": "^2.0.0"
+    "conventional-recommended-bump": "^6.1.0"
   },
   "devDependencies": {
     "bron": "^1.1.1",

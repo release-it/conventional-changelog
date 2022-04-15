@@ -5,7 +5,6 @@ const conventionalRecommendedBump = require('conventional-recommended-bump');
 const conventionalChangelog = require('conventional-changelog');
 const semver = require('semver');
 const concat = require('concat-stream');
-const prependFile = require('prepend-file');
 
 class ConventionalChangelog extends Plugin {
   static disablePlugin(options) {
