@@ -70,6 +70,8 @@ const features = EOL + EOL + EOL + '### Features' + EOL;
 const fixes = EOL + EOL + EOL + '### Bug Fixes' + EOL;
 const commit = (type, name) => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} ${sha}`;
 
+const nl = value => value.split(/\r\n|\r|\n/g).join(EOL);
+
 test('should generate changelog using recommended bump (minor)', async () => {
   setup();
 
@@ -82,7 +84,7 @@ test('should generate changelog using recommended bump (minor)', async () => {
   const title = header('1.0.0', '1.1.0');
   const bar = commit('fix', 'bar');
   const baz = commit('feat', 'baz');
-  assert.match(changelog, new RegExp(title + fixes + bar + features + baz));
+  assert.match(nl(changelog), new RegExp(title + fixes + bar + features + baz));
 });
 
 test('should generate changelog using recommended bump (patch)', async () => {
@@ -97,7 +99,7 @@ test('should generate changelog using recommended bump (patch)', async () => {
   const title = header('1.0.0', '1.0.1');
   const bar = commit('fix', 'bar');
   const baz = commit('fix', 'baz');
-  assert.match(changelog, new RegExp(title + fixes + bar + baz));
+  assert.match(nl(changelog), new RegExp(title + fixes + bar + baz));
 });
 
 test('should support tag prefix', async () => {
@@ -110,12 +112,12 @@ test('should support tag prefix', async () => {
   config.git.tagName = 'next-${version}';
   const { changelog } = await runTasks(config, container);
   assert.match(
-    changelog,
+    nl(changelog),
     /# \[2\.0\.1\]\(\/compare\/next-2\.0\.0\.\.\.next-2\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}/
   );
   const title = header('next-2.0.0', 'next-2.0.1', '2.0.1');
   const bar = commit('fix', 'bar');
-  assert.match(changelog, new RegExp(title + fixes + bar));
+  assert.match(nl(changelog), new RegExp(title + fixes + bar));
 });
 
 test('should respect --no-increment and return previous, identical changelog', async () => {
@@ -135,7 +137,7 @@ test('should respect --no-increment and return previous, identical changelog', a
   const title = header('1.1.0', '1.2.0');
   const bar = commit('fix', 'bar');
   const baz = commit('feat', 'baz');
-  assert.match(changelog, new RegExp(title + fixes + bar + features + baz));
+  assert.match(nl(changelog), new RegExp(title + fixes + bar + features + baz));
 });
 
 test('should ignore recommended bump (option)', async () => {
@@ -229,7 +231,7 @@ test('should not throw with Git plugin disabled', async () => {
   assert.equal(version, '0.0.1');
   const title = `## 0.0.1 ${date}`;
   const fix = commit('fix', 'foo');
-  assert.match(changelog, new RegExp(title + fixes + fix));
+  assert.match(nl(changelog), new RegExp(title + fixes + fix));
 });
 
 test(`should write and update infile`, async () => {
@@ -247,7 +249,7 @@ test(`should write and update infile`, async () => {
   const title = header('1.0.0', '1.1.0');
   const fix1 = commit('fix', 'foo');
   const feat1 = commit('feat', 'bar');
-  assert.match(changelog, new RegExp(h + EOL + EOL + title + fixes + fix1 + features + feat1));
+  assert.match(nl(changelog), new RegExp(h + EOL + EOL + title + fixes + fix1 + features + feat1));
   {
     add('fix', 'bar');
     add('fix', 'baz');
@@ -260,7 +262,7 @@ test(`should write and update infile`, async () => {
     const fix2 = commit('fix', 'bar');
     const fix3 = commit('fix', 'baz');
     assert.match(
-      changelog,
+      nl(changelog),
       new RegExp(h + EOL + EOL + title2 + fixes + fix2 + fix3 + EOL + EOL + title + fixes + fix1 + features + feat1)
     );
   }
