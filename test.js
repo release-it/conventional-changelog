@@ -66,9 +66,9 @@ const setup = () => {
 const date = /\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/.source;
 const sha = /[0-9a-f]{7}/.source;
 const header = (from, to, version) => `# \\[${version || to}\\]\\(/compare/${from}...${to}\\) ${date}`;
-const features = '\\n\\n\\n### Features\\n';
-const fixes = '\\n\\n\\n### Bug Fixes\\n';
-const commit = (type, name) => `\\n\\* \\*\\*${name}:\\*\\* ${type} ${name} ${sha}`;
+const features = EOL + EOL + EOL + '### Features' + EOL;
+const fixes = EOL + EOL + EOL + '### Bug Fixes' + EOL;
+const commit = (type, name) => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} ${sha}`;
 
 test('should generate changelog using recommended bump (minor)', async () => {
   setup();
@@ -238,7 +238,7 @@ test(`should write and update infile`, async () => {
   add('fix', 'foo');
   add('feat', 'bar');
 
-  const h = 'The header\n\nThe subheader';
+  const h = 'The header' + EOL + EOL + 'The subheader';
   const infile = path.join(dir, 'CHANGES.md');
   const [config, container] = getOptions({ preset, infile, header: h });
   config.git.tag = true;
