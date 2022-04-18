@@ -8,6 +8,10 @@ import runTasks from 'release-it';
 
 sh.config.silent = true;
 
+try {
+  fs.unlinkSync('CHANGES.md');
+} catch (error) {}
+
 const noop = () => {};
 const log = {
   log: noop,

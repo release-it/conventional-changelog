@@ -5,7 +5,6 @@ import conventionalRecommendedBump from 'conventional-recommended-bump';
 import conventionalChangelog from 'conventional-changelog';
 import semver from 'semver';
 import concat from 'concat-stream';
-import prependFile from 'prepend-file';
 
 class ConventionalChangelog extends Plugin {
   static disablePlugin(options) {
@@ -73,7 +72,7 @@ class ConventionalChangelog extends Plugin {
     const options = Object.assign({}, { releaseCount }, this.options);
     const { context, gitRawCommitsOpts, parserOpts, writerOpts, ..._o } = options;
     const _c = Object.assign({ version, previousTag, currentTag }, context);
-    const _r = Object.assign({ debug }, gitRawCommitsOpts);
+    const _r = Object.assign({ debug, from: previousTag }, gitRawCommitsOpts);
     this.debug('conventionalChangelog', { options: _o, context: _c, gitRawCommitsOpts: _r, parserOpts, writerOpts });
     return conventionalChangelog(_o, _c, _r, parserOpts, writerOpts);
   }
@@ -87,9 +86,20 @@ class ConventionalChangelog extends Plugin {
     });
   }
 
-  async writeChangelog() {
+  getPreviousChangelog() {
     const { infile } = this.options;
+    return new Promise((resolve, reject) => {
+      const readStream = fs.createReadStream(infile);
+      const resolver = result => resolve(result.toString().trim());
+      readStream.pipe(concat(resolver));
+      readStream.on('error', reject);
+    });
+  }
+
+  async writeChangelog() {
+    const { infile, header: _header = '' } = this.options;
     let { changelog } = this.config.getContext();
+    const header = _header.split(/\r\n|\r|\n/g).join(EOL);
 
     let hasInfile = false;
     try {
@@ -99,12 +109,25 @@ class ConventionalChangelog extends Plugin {
       this.debug(err);
     }
 
+    let previousChangelog = '';
+    try {
+      previousChangelog = await this.getPreviousChangelog();
+      previousChangelog = previousChangelog.replace(header, '');
+    } catch (err) {
+      this.debug(err);
+    }
+
     if (!hasInfile) {
       changelog = await this.generateChangelog({ releaseCount: 0 });
       this.debug({ changelog });
     }
 
-    await prependFile(infile, changelog + EOL + EOL);
+    fs.writeFileSync(
+      infile,
+      header +
+        (changelog ? EOL + EOL + changelog.trim() : '') +
+        (previousChangelog ? EOL + EOL + previousChangelog.trim() : '')
+    );
 
     if (!hasInfile) {
       await this.exec(`git add ${infile}`);
