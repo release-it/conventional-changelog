@@ -113,7 +113,7 @@ test('should support tag prefix', async () => {
   const { changelog } = await runTasks(config, container);
   assert.match(
     nl(changelog),
-    /# \[2\.0\.1\]\(\/compare\/next-2\.0\.0\.\.\.next-2\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\n\n\* \*\*bar:\*\* fix bar [0-9a-f]{7}/
+    /# \[2\.0\.1\]\(\/compare\/next-2\.0\.0\.\.\.next-2\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\s*\* \*\*bar:\*\* fix bar [0-9a-f]{7}/
   );
   const title = header('next-2.0.0', 'next-2.0.1', '2.0.1');
   const bar = commit('fix', 'bar');
