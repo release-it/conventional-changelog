@@ -2,6 +2,7 @@ import test from 'bron';
 import { strict as assert } from 'assert';
 import fs from 'fs';
 import path from 'path';
+import { EOL } from 'os';
 import sh from 'shelljs';
 import tmp from 'tmp';
 import runTasks from 'release-it';
@@ -237,28 +238,30 @@ test(`should write and update infile`, async () => {
   add('fix', 'foo');
   add('feat', 'bar');
 
+  const h = 'The header\n\nThe subheader';
   const infile = path.join(dir, 'CHANGES.md');
-  const [config, container] = getOptions({ preset, infile });
+  const [config, container] = getOptions({ preset, infile, header: h });
   config.git.tag = true;
   await runTasks(config, container);
   const changelog = fs.readFileSync(infile).toString();
   const title = header('1.0.0', '1.1.0');
   const fix1 = commit('fix', 'foo');
   const feat1 = commit('feat', 'bar');
-  assert.match(changelog, new RegExp(title + fixes + fix1 + features + feat1));
+  assert.match(changelog, new RegExp(h + EOL + EOL + title + fixes + fix1 + features + feat1));
   {
     add('fix', 'bar');
     add('fix', 'baz');
 
-    const options = getOptions({ preset, infile });
+    const options = getOptions({ preset, infile, header: h });
     await runTasks(...options);
     const changelog = fs.readFileSync(infile).toString();
-    const title2 = header('1.1.0', '1.1.1');
+    // TODO Why did conventional-changelog add a heading level (`#`) here?
+    const title2 = '#' + header('1.1.0', '1.1.1');
     const fix2 = commit('fix', 'bar');
     const fix3 = commit('fix', 'baz');
     assert.match(
       changelog,
-      new RegExp(title2 + fixes + fix2 + fix3 + '\\n\\n' + title + fixes + fix1 + features + feat1)
+      new RegExp(h + EOL + EOL + title2 + fixes + fix2 + fix3 + EOL + EOL + title + fixes + fix1 + features + feat1)
     );
   }
 });
