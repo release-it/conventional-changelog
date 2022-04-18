@@ -11,7 +11,6 @@ jobs:
           - windows-latest
           - macos-latest
         node:
-          - 12
           - 14
           - 16
 
@@ -19,7 +18,10 @@ jobs:
     name: ${{ matrix.os }} (Node v${{ matrix.node }})
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
       - run: |
           git config --global init.defaultBranch main
           git config --global user.name User

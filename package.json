@@ -46,7 +46,7 @@
     "release-it": "^15.0.0-esm.4"
   },
   "engines": {
-    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+    "node": ">=14"
   },
   "release-it": {
     "hooks": {
