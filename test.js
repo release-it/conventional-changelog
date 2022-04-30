@@ -32,13 +32,7 @@ const preset = 'angular';
 const getOptions = options => [
   {
     ci: true,
-    'disable-metrics': true,
-    git: {
-      commit: false,
-      tag: false,
-      push: false,
-      requireUpstream: false
-    },
+    git: { commit: false, tag: false, push: false, requireUpstream: false },
     plugins: { [pathname]: [namespace, options] }
   },
   { log }
