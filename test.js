@@ -286,6 +286,31 @@ test('should not write infile in dry run', async () => {
   assert.throws(() => fs.readFileSync(infile), /no such file/);
 });
 
+test('should not bump when recommended bump returns null', async () => {
+  setup();
+  sh.exec(`git tag 1.0.0`);
+  add('fix', 'bar');
+  add('feat', 'baz');
+  {
+    const options = getOptions({ preset: 'angular' });
+    const { version } = await runTasks(...options);
+    assert.equal(version, '1.1.0');
+  }
+  add('blorp', 'faz');
+  add('faz', 'blorp');
+  {
+    const options = getOptions({ preset: 'angular' });
+    const { version } = await runTasks(...options);
+    assert.equal(version, '1.1.0'); // Incorrect result from conventional-recommended-bump
+  }
+  {
+    const whatBump = commits => ({ level: null, reason: 'Parsed commits do not warrant a version bump.' });
+    const options = getOptions({ whatBump });
+    const { version } = await runTasks(...options);
+    assert.equal(version, undefined);
+  }
+});
+
 // TODO Prepare test and verify results influenced by parserOpts and writerOpts
 test.skip('should pass parserOpts and writerOpts', async t => {
   setup();
