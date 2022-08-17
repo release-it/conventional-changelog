@@ -33,17 +33,18 @@
   "dependencies": {
     "concat-stream": "^2.0.0",
     "conventional-changelog": "^3.1.25",
-    "conventional-recommended-bump": "^6.1.0"
+    "conventional-recommended-bump": "^6.1.0",
+    "semver": "^7.3.7"
   },
   "devDependencies": {
     "bron": "^2.0.2",
-    "release-it": "^15.0.0-esm.4",
+    "release-it": "^15.3.0",
     "shelljs": "^0.8.5",
-    "sinon": "^13.0.2",
+    "sinon": "^14.0.0",
     "tmp": "^0.2.1"
   },
   "peerDependencies": {
-    "release-it": "^15.0.0-esm.4"
+    "release-it": "^15.3.0"
   },
   "engines": {
     "node": ">=14"
