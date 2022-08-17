@@ -3,7 +3,10 @@
   "version": "5.0.0",
   "description": "Conventional changelog plugin for release-it",
   "type": "module",
-  "exports": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "test": "bron test.js --serial",
     "release": "release-it"
