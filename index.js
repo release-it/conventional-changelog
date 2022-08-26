@@ -8,7 +8,7 @@ import concat from 'concat-stream';
 
 class ConventionalChangelog extends Plugin {
   static disablePlugin(options) {
-    return options.ignoreRecommendedBump ? null : 'version';
+    return options.ignoreRecommendedBump ? 'version' : null;
   }
 
   getInitialOptions(options, namespace) {
@@ -125,8 +125,8 @@ class ConventionalChangelog extends Plugin {
     fs.writeFileSync(
       infile,
       header +
-        (changelog ? EOL + EOL + changelog.trim() : '') +
-        (previousChangelog ? EOL + EOL + previousChangelog.trim() : '')
+      (changelog ? EOL + EOL + changelog.trim() : '') +
+      (previousChangelog ? EOL + EOL + previousChangelog.trim() : '')
     );
 
     if (!hasInfile) {
