@@ -5,6 +5,7 @@ import path from 'path';
 import { EOL } from 'os';
 import sh from 'shelljs';
 import tmp from 'tmp';
+import semver from 'semver';
 import runTasks from 'release-it';
 
 sh.config.silent = true;
@@ -59,7 +60,9 @@ const setup = () => {
 
 const date = /\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/.source;
 const sha = /[0-9a-f]{7}/.source;
-const header = (from, to, version) => `# \\[${version || to}\\]\\(/compare/${from}...${to}\\) ${date}`;
+const level = (from, to, version) => `${/patch/.test(semver.diff(from, version || to)) ? '##' : '#'}`;
+const header = (from, to, version) =>
+  `${level(from, to, version)} \\[${version || to}\\]\\(/compare/${from}...${to}\\) ${date}`;
 const features = EOL + EOL + EOL + '### Features' + EOL;
 const fixes = EOL + EOL + EOL + '### Bug Fixes' + EOL;
 const commit = (type, name) => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} ${sha}`;
@@ -78,7 +81,7 @@ test('should generate changelog using recommended bump (minor)', async () => {
   const title = header('1.0.0', '1.1.0');
   const bar = commit('fix', 'bar');
   const baz = commit('feat', 'baz');
-  assert.match(nl(changelog), new RegExp(title + fixes + bar + features + baz));
+  assert.match(nl(changelog), new RegExp('^' + title + fixes + bar + features + baz + '$'));
 });
 
 test('should generate changelog using recommended bump (patch)', async () => {
@@ -93,25 +96,25 @@ test('should generate changelog using recommended bump (patch)', async () => {
   const title = header('1.0.0', '1.0.1');
   const bar = commit('fix', 'bar');
   const baz = commit('fix', 'baz');
-  assert.match(nl(changelog), new RegExp(title + fixes + bar + baz));
+  assert.match(nl(changelog), new RegExp('^' + title + fixes + bar + baz + '$'));
 });
 
-test('should support tag prefix', async () => {
+test('should support tag suffix', async () => {
   setup();
 
-  sh.exec(`git tag next-2.0.0`);
+  sh.exec(`git tag 2.0.0-next`);
   add('fix', 'bar');
 
   const [config, container] = getOptions({ preset });
-  config.git.tagName = 'next-${version}';
+  config.git.tagName = '${version}-next';
   const { changelog } = await runTasks(config, container);
   assert.match(
     nl(changelog),
-    /# \[2\.0\.1\]\(\/compare\/next-2\.0\.0\.\.\.next-2\.0\.1\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\s*\* \*\*bar:\*\* fix bar [0-9a-f]{7}/
+    /^## \[2\.0\.1\]\(\/compare\/2\.0\.0-next\.\.\.2\.0\.1-next\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\s*\* \*\*bar:\*\* fix bar [0-9a-f]{7}$/
   );
-  const title = header('next-2.0.0', 'next-2.0.1', '2.0.1');
+  const title = header('2.0.0-next', '2.0.1-next', '2.0.1');
   const bar = commit('fix', 'bar');
-  assert.match(nl(changelog), new RegExp(title + fixes + bar));
+  assert.match(nl(changelog), new RegExp('^' + title + fixes + bar + '$'));
 });
 
 test('should respect --no-increment and return previous, identical changelog', async () => {
@@ -131,7 +134,7 @@ test('should respect --no-increment and return previous, identical changelog', a
   const title = header('1.1.0', '1.2.0');
   const bar = commit('fix', 'bar');
   const baz = commit('feat', 'baz');
-  assert.match(nl(changelog), new RegExp(title + fixes + bar + features + baz));
+  assert.match(nl(changelog), new RegExp('^' + title + fixes + bar + features + baz + '$'));
 });
 
 test('should ignore recommended bump (option)', async () => {
@@ -243,7 +246,7 @@ test(`should write and update infile`, async () => {
   const title = header('1.0.0', '1.1.0');
   const fix1 = commit('fix', 'foo');
   const feat1 = commit('feat', 'bar');
-  assert.match(nl(changelog), new RegExp(h + EOL + EOL + title + fixes + fix1 + features + feat1));
+  assert.match(nl(changelog), new RegExp('^' + h + EOL + EOL + title + fixes + fix1 + features + feat1 + '$'));
   {
     add('fix', 'bar');
     add('fix', 'baz');
@@ -251,13 +254,14 @@ test(`should write and update infile`, async () => {
     const options = getOptions({ preset, infile, header: h });
     await runTasks(...options);
     const changelog = fs.readFileSync(infile).toString();
-    // TODO Why did conventional-changelog add a heading level (`#`) here?
-    const title2 = '#' + header('1.1.0', '1.1.1');
+    const title2 = header('1.1.0', '1.1.1');
     const fix2 = commit('fix', 'bar');
     const fix3 = commit('fix', 'baz');
     assert.match(
       nl(changelog),
-      new RegExp(h + EOL + EOL + title2 + fixes + fix2 + fix3 + EOL + EOL + title + fixes + fix1 + features + feat1)
+      new RegExp(
+        '^' + h + EOL + EOL + title2 + fixes + fix2 + fix3 + EOL + EOL + title + fixes + fix1 + features + feat1 + '$'
+      )
     );
   }
 });
