@@ -290,6 +290,15 @@ test('should not write infile in dry run', async () => {
   assert.throws(() => fs.readFileSync(infile), /no such file/);
 });
 
+test('should not write infile if set to false', async () => {
+  const { dir } = setup();
+  const infile = path.join(dir, 'DRYRUN.md');
+  const options = getOptions({ preset, infile: false });
+  const { version } = await runTasks(...options);
+  assert.throws(() => fs.readFileSync(infile), /no such file/);
+  assert.equal(version, '0.0.1');
+});
+
 test('should not bump when recommended bump returns null', async () => {
   setup();
   sh.exec(`git tag 1.0.0`);
