@@ -189,7 +189,7 @@ test('should use recommended bump (after pre-rerelease)', async t => {
   assert.equal(version, '1.1.0');
 });
 
-test('should follow true semver (pre-release continuation)', async t => {
+test('should follow strict semver (pre-release continuation)', async t => {
   setup();
   sh.exec(`git tag 1.1.0-alpha.0`);
   add('feat', 'baz');
@@ -198,6 +198,19 @@ test('should follow true semver (pre-release continuation)', async t => {
   config.preRelease = 'alpha';
   const { version } = await runTasks(config, container);
   assert.equal(version, '1.2.0-alpha.0');
+});
+
+test('should follow strict semver (pre-release continuation, conventionalcommits)', async t => {
+  setup();
+  sh.exec(`git tag 2.0.1-alpha.0`);
+  sh.ShellString('file').toEnd('file');
+  sh.exec(`git add file`);
+  sh.exec(`git commit -m "feat: new feature"`);
+
+  const [config, container] = getOptions({ preset: 'conventionalcommits', strictSemVer: true });
+  config.preRelease = 'alpha';
+  const { version } = await runTasks(config, container);
+  assert.equal(version, '2.1.0-alpha.0');
 });
 
 test('should use provided increment', async () => {
