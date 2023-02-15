@@ -43,7 +43,7 @@
     "bron": "^2.0.2",
     "release-it": "^15.4.1",
     "shelljs": "^0.8.5",
-    "sinon": "14.0.1",
+    "sinon": "^15.0.1",
     "tmp": "^0.2.1"
   },
   "peerDependencies": {
