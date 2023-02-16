@@ -213,6 +213,19 @@ test('should follow strict semver (pre-release continuation, conventionalcommits
   assert.equal(version, '2.1.0-alpha.0');
 });
 
+test('should bump alpha strict semver (pre-release continuation, conventionalcommits)', async t => {
+  setup();
+  sh.exec(`git tag 2.0.0-alpha.0`);
+  sh.ShellString('file').toEnd('file');
+  sh.exec(`git add file`);
+  sh.exec(`git commit -m "fix: fix bug"`);
+
+  const [config, container] = getOptions({ preset: 'conventionalcommits', strictSemVer: true });
+  config.preRelease = 'alpha';
+  const { version } = await runTasks(config, container);
+  assert.equal(version, '2.0.0-alpha.1');
+});
+
 test('should use provided increment', async () => {
   setup();
   sh.exec(`git tag 1.0.0`);
