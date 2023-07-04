@@ -57,7 +57,8 @@
       "before:init": "npm test"
     },
     "github": {
-      "release": true
+      "release": true,
+      "tokenRef": "GITHUB_TOKEN_RELEASE_IT"
     }
   }
 }
