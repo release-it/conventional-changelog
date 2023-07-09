@@ -41,16 +41,16 @@
   },
   "devDependencies": {
     "bron": "^2.0.2",
-    "release-it": "^15.11.0",
+    "release-it": "^16.0.0",
     "shelljs": "^0.8.5",
     "sinon": "^15.2.0",
     "tmp": "^0.2.1"
   },
   "peerDependencies": {
-    "release-it": "^15.4.1"
+    "release-it": "^16.0.0"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "release-it": {
     "hooks": {
