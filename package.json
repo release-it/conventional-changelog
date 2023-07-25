@@ -37,7 +37,7 @@
     "concat-stream": "^2.0.0",
     "conventional-changelog": "^4.0.0",
     "conventional-recommended-bump": "^7.0.1",
-    "semver": "7.5.1"
+    "semver": "^7.5.4"
   },
   "devDependencies": {
     "bron": "^2.0.2",
