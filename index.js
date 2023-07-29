@@ -36,7 +36,7 @@ class ConventionalChangelog extends Plugin {
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
     this.debug('conventionalRecommendedBump', { options });
     return new Promise((resolve, reject) =>
-      conventionalRecommendedBump(options, (err, result) => {
+      conventionalRecommendedBump(options, options?.parserOpts, (err, result) => {
         this.debug({ err, result });
         if (err) return reject(err);
         let { releaseType } = result;
