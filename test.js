@@ -28,7 +28,7 @@ const log = {
 
 const namespace = 'conventional-changelog';
 const { pathname } = new URL('./index.js', import.meta.url);
-const preset = 'angular';
+const preset = { name: 'angular' };
 
 const getOptions = options => [
   {
@@ -212,7 +212,12 @@ test('should follow strict semver (pre-release continuation, conventionalcommits
   sh.exec(`git add file`);
   sh.exec(`git commit -m "feat: new feature"`);
 
-  const [config, container] = getOptions({ preset: 'conventionalcommits', strictSemVer: true });
+  const [config, container] = getOptions({
+    preset: { name: 'conventionalcommits' },
+    strictSemVer: true,
+    writerOpts: {},
+    parserOpts: {}
+  });
   config.preRelease = 'alpha';
   const { version } = await runTasks(config, container);
   assert.equal(version, '2.1.0-alpha.0');
@@ -296,7 +301,7 @@ test('should reject if conventional bump passes error', async () => {
 test('should reject if conventional changelog has error', async () => {
   setup();
   const options = getOptions({ preset: () => {} });
-  await assert.rejects(runTasks(...options), /preset must be string or object with key name/);
+  await assert.rejects(runTasks(...options), /preset must be string or object with property `name`/i);
 });
 
 test('should not write infile in dry run', async () => {
