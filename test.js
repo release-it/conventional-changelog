@@ -60,9 +60,9 @@ const setup = () => {
 
 const date = /\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/.source;
 const sha = /[0-9a-f]{7}/.source;
-const level = (from, to, version) => `${/patch/.test(semver.diff(from, version || to)) ? '##' : '#'}`;
-const header = (from, to, version) =>
-  `${level(from, to, version)} \\[${version || to}\\]\\(/compare/${from}...${to}\\) ${date}`;
+const level = (from, to) => `${/patch/.test(semver.diff(from, to)) ? '##' : '#'}`;
+const header = (from, to, suffix = '') =>
+  `${level(from, to)} \\[${to}\\]\\(/compare/${from}${suffix}...${to}${suffix}\\) ${date}`;
 const features = EOL + EOL + EOL + '### Features' + EOL;
 const fixes = EOL + EOL + EOL + '### Bug Fixes' + EOL;
 const commit = (type, name) => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} ${sha}`;
@@ -102,17 +102,22 @@ test('should generate changelog using recommended bump (patch)', async () => {
 test('should support tag suffix', async () => {
   setup();
 
-  sh.exec(`git tag 2.0.0-next`);
+  const latestVersion = '2.0.0';
+  const suffix = '-next';
+  const latestTag = latestVersion + suffix;
+
+  sh.exec(`git tag ${latestTag}`);
   add('fix', 'bar');
 
   const [config, container] = getOptions({ preset });
-  config.git.tagName = '${version}-next';
-  const { changelog } = await runTasks(config, container);
+  config.git.tagName = `\${version}${suffix}`;
+  const { changelog, version } = await runTasks(config, container);
   assert.match(
     nl(changelog),
+    // release-it supports tag suffix/template, but conventional-changelog does not so the title will not contain it:
     /^## \[2\.0\.1\]\(\/compare\/2\.0\.0-next\.\.\.2\.0\.1-next\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\s*\* \*\*bar:\*\* fix bar [0-9a-f]{7}$/
   );
-  const title = header('2.0.0-next', '2.0.1-next', '2.0.1');
+  const title = header(latestVersion, version, suffix);
   const bar = commit('fix', 'bar');
   assert.match(nl(changelog), new RegExp('^' + title + fixes + bar + '$'));
 });
