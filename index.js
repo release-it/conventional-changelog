@@ -61,20 +61,30 @@ class ConventionalChangelog extends Plugin {
     );
   }
 
-  getChangelogStream(opts = {}) {
+  getChangelogStream(rawOptions = {}) {
     const { version } = this.getContext();
     const { isIncrement } = this.config;
     const { latestTag, secondLatestTag, tagTemplate } = this.config.getContext();
     const currentTag = isIncrement ? (tagTemplate ? tagTemplate.replace('${version}', version) : null) : latestTag;
     const previousTag = isIncrement ? latestTag : secondLatestTag;
-    const releaseCount = opts.releaseCount === 0 ? 0 : isIncrement ? 1 : 2;
+    const releaseCount = rawOptions.releaseCount === 0 ? 0 : isIncrement ? 1 : 2;
     const debug = this.config.isDebug ? this.debug : null;
-    const options = Object.assign({}, { releaseCount }, this.options);
-    const { context, gitRawCommitsOpts, parserOpts, writerOpts, ..._o } = options;
-    const _c = Object.assign({ version, previousTag, currentTag }, context);
-    const _r = Object.assign({ debug, from: previousTag }, gitRawCommitsOpts);
-    this.debug('conventionalChangelog', { options: _o, context: _c, gitRawCommitsOpts: _r, parserOpts, writerOpts });
-    return conventionalChangelog(_o, _c, _r, parserOpts, writerOpts);
+    const mergedOptions = Object.assign({}, { releaseCount }, this.options);
+
+    const { context, gitRawCommitsOpts, parserOpts, writerOpts, ...options } = mergedOptions;
+
+    const mergedContext = Object.assign({ version, previousTag, currentTag }, context);
+    const mergedGitRawCommitsOpts = Object.assign({ debug, from: previousTag }, gitRawCommitsOpts);
+
+    this.debug('conventionalChangelog', {
+      options,
+      context: mergedContext,
+      gitRawCommitsOpts: mergedGitRawCommitsOpts,
+      parserOpts,
+      writerOpts
+    });
+
+    return conventionalChangelog(options, mergedContext, mergedGitRawCommitsOpts, parserOpts, writerOpts);
   }
 
   generateChangelog(options) {
