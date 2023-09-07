@@ -13,7 +13,9 @@ In the [release-it](https://github.com/release-it/release-it) config, for exampl
 ```json
 "plugins": {
   "@release-it/conventional-changelog": {
-    "preset": "angular",
+    "preset": {
+      "name": "angular"
+    },
     "infile": "CHANGELOG.md"
   }
 }
