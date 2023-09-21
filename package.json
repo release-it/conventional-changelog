@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "concat-stream": "^2.0.0",
-    "conventional-changelog": "^5.0.0",
+    "conventional-changelog": "^5.1.0",
     "conventional-recommended-bump": "^8.0.0",
     "semver": "^7.5.4"
   },
