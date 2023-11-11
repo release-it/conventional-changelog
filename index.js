@@ -29,36 +29,37 @@ class ConventionalChangelog extends Plugin {
     return this.generateChangelog();
   }
 
-  getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
+  async getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
     const { version } = this.getContext();
     if (version) return version;
     const { options } = this;
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
     this.debug('conventionalRecommendedBump', { options });
-    return new Promise((resolve, reject) =>
-      conventionalRecommendedBump(options, options?.parserOpts, (err, result) => {
-        this.debug({ err, result });
-        if (err) return reject(err);
-        let { releaseType } = result;
-        if (increment) {
-          this.log.warn(`The recommended bump is "${releaseType}", but is overridden with "${increment}".`);
-          releaseType = increment;
-        }
-        if (increment && semver.valid(increment)) {
-          resolve(increment);
-        } else if (isPreRelease) {
-          const type =
-            releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))
-              ? `pre${releaseType}`
-              : 'prerelease';
-          resolve(semver.inc(latestVersion, type, preReleaseId));
-        } else if (releaseType) {
-          resolve(semver.inc(latestVersion, releaseType, preReleaseId));
-        } else {
-          resolve(null);
-        }
-      })
-    );
+    try {
+      const result = await conventionalRecommendedBump(options, options?.parserOpts);
+      this.debug({ result });
+      let { releaseType } = result;
+      if (increment) {
+        this.log.warn(`The recommended bump is "${releaseType}", but is overridden with "${increment}".`);
+        releaseType = increment;
+      }
+      if (increment && semver.valid(increment)) {
+        return increment;
+      } else if (isPreRelease) {
+        const type =
+          releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))
+            ? `pre${releaseType}`
+            : 'prerelease';
+        return semver.inc(latestVersion, type, preReleaseId);
+      } else if (releaseType) {
+        return semver.inc(latestVersion, releaseType, preReleaseId);
+      } else {
+        return null;
+      }
+    } catch (err) {
+      this.debug({ err });
+      throw err;
+    }
   }
 
   getChangelogStream(rawOptions = {}) {
