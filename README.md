@@ -187,7 +187,7 @@ For example, you can use the following option to group the commits by 'scope' in
   "plugins": {
     "@release-it/conventional-changelog": {
       "writerOpts": {
-        "groupBy:" "scope"
+        "groupBy": "scope"
       }
     }
   }
