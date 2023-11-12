@@ -137,7 +137,8 @@ class ConventionalChangelog extends Plugin {
       infile,
       header +
         (changelog ? EOL + EOL + changelog.trim() : '') +
-        (previousChangelog ? EOL + EOL + previousChangelog.trim() : '')
+        (previousChangelog ? EOL + EOL + previousChangelog.trim() : '') +
+        EOL
     );
 
     if (!hasInfile) {

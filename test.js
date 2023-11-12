@@ -269,7 +269,8 @@ test(`should write and update infile`, async () => {
   const title = header('1.0.0', '1.1.0');
   const fix1 = commit('fix', 'foo');
   const feat1 = commit('feat', 'bar');
-  assert.match(nl(changelog), new RegExp('^' + h + EOL + EOL + title + fixes + fix1 + features + feat1 + '$'));
+  const first = title + fixes + fix1 + features + feat1;
+  assert.match(nl(changelog), new RegExp('^' + h + EOL + EOL + first + EOL + '$'));
   {
     add('fix', 'bar');
     add('fix', 'baz');
@@ -280,12 +281,8 @@ test(`should write and update infile`, async () => {
     const title2 = header('1.1.0', '1.1.1');
     const fix2 = commit('fix', 'bar');
     const fix3 = commit('fix', 'baz');
-    assert.match(
-      nl(changelog),
-      new RegExp(
-        '^' + h + EOL + EOL + title2 + fixes + fix2 + fix3 + EOL + EOL + title + fixes + fix1 + features + feat1 + '$'
-      )
-    );
+    const second = title2 + fixes + fix2 + fix3;
+    assert.match(nl(changelog), new RegExp('^' + h + EOL + EOL + second + EOL + EOL + first + EOL + '$'));
   }
 });
 
