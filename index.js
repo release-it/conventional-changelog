@@ -36,8 +36,14 @@ class ConventionalChangelog extends Plugin {
     const { options } = this;
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
     this.debug('conventionalRecommendedBump', { options });
+    let { tagPrefix } = options
+    const npmName = this.config.getContext('npm.name')
+    if (tagPrefix && npmName) {
+      tagPrefix = tagPrefix.replace(/\$\{npm\.name\}/, npmName)
+    }
+    const updatedOptions = { ...options, tagPrefix }
     try {
-      const result = await conventionalRecommendedBump(options, options?.parserOpts);
+      const result = await conventionalRecommendedBump(updatedOptions, options?.parserOpts);
       this.debug({ result });
       let { releaseType } = result;
       if (increment) {
