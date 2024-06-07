@@ -46,6 +46,10 @@ class ConventionalChangelog extends Plugin {
       if (increment && semver.valid(increment)) {
         return increment;
       } else if (isPreRelease) {
+        // If we got an undefined releaseType back we are skipping the release no matter what
+        if (!releaseType) {
+          return null;
+        }
         const type =
           releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))
             ? `pre${releaseType}`
