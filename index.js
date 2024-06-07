@@ -5,7 +5,22 @@ import conventionalRecommendedBump from 'conventional-recommended-bump';
 import conventionalChangelog from 'conventional-changelog';
 import semver from 'semver';
 import concat from 'concat-stream';
-import gitSemverTags from 'git-semver-tags';
+import { ConventionalGitClient, packagePrefix } from '@conventional-changelog/git-client'
+
+// Duplicate function from git-semver-tags
+function getFinalOptions (options = {}) {
+  if (options.package && !options.lernaTags) {
+    throw new Error('opts.package should only be used when running in lerna mode')
+  }
+
+  const finalOptions = {
+    cwd: options.cwd || process.cwd(),
+    prefix: options.lernaTags ? packagePrefix(options.package) : options.tagPrefix,
+    skipUnstable: options.skipUnstable
+  }
+
+  return finalOptions
+}
 
 class ConventionalChangelog extends Plugin {
   static disablePlugin(options) {
@@ -51,14 +66,17 @@ class ConventionalChangelog extends Plugin {
         // Determine what our diff to the last non-prerelease would be
         const { releaseType: releaseTypeToLastNonPrerelease } = await conventionalRecommendedBump({...options, skipUnstable: true});
 
-        // Get the latest non prerelease tag
-        const semVerTags = await gitSemverTags({
+        // Git client options
+        const gitClientOptions = getFinalOptions({
           lernaTags: !!options.lernaPackage,
           package: options.lernaPackage,
           tagPrefix: options.tagPrefix,
           skipUnstable: true,
           cwd: options.cwd
         });
+
+        // Get the latest non prerelease tag
+        const semVerTags = await new ConventionalGitClient(gitClientOptions.cwd).getSemverTags(gitClientOptions);
 
         // Make sure we have at least one tag else we can completely ignore this
         if(semVerTags.length > 0) {
