@@ -37,14 +37,15 @@
     "concat-stream": "^2.0.0",
     "conventional-changelog": "^5.1.0",
     "conventional-recommended-bump": "^9.0.0",
-    "semver": "^7.5.4"
+    "semver": "^7.6.2"
   },
   "devDependencies": {
-    "bron": "^2.0.2",
-    "release-it": "^17.0.0",
+    "bron": "^2.0.3",
+    "installed-check": "^9.3.0",
+    "release-it": "^17.5.0",
     "shelljs": "^0.8.5",
-    "sinon": "^17.0.1",
-    "tmp": "^0.2.1"
+    "sinon": "^18.0.0",
+    "tmp": "^0.2.3"
   },
   "peerDependencies": {
     "release-it": "^17.0.0"
@@ -54,7 +55,7 @@
   },
   "release-it": {
     "hooks": {
-      "before:init": "npm test"
+      "before:init": "npm test && installed-check"
     },
     "github": {
       "release": true,
