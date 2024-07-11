@@ -34,6 +34,7 @@
     "url": "https://webpro.nl"
   },
   "dependencies": {
+    "@conventional-changelog/git-client": "^1.0.1",
     "concat-stream": "^2.0.0",
     "conventional-changelog": "^5.1.0",
     "conventional-recommended-bump": "^9.0.0",
