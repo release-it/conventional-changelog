@@ -30,10 +30,10 @@ const namespace = 'conventional-changelog';
 const { pathname } = new URL('./index.js', import.meta.url);
 const preset = { name: 'angular' };
 
-const getOptions = options => [
+const getOptions = (options, git = { commit: false, tag: false }) => [
   {
     ci: true,
-    git: { commit: false, tag: false, push: false, requireUpstream: false },
+    git: { commit: git.commit, tag: git.tag, push: false, requireUpstream: false },
     plugins: { [pathname]: [namespace, options] }
   },
   { log }
@@ -44,10 +44,10 @@ const mkTmpDir = () => {
   return dir.name;
 };
 
-const add = (type, file) => {
+const add = (type, file, opts = { breaking: false }) => {
   sh.ShellString(file).toEnd(file);
   sh.exec(`git add ${file}`);
-  sh.exec(`git commit -m "${type}(${file}): ${type} ${file}"`);
+  sh.exec(`git commit -m "${type}(${file})${opts.breaking ? '!' : ''}: ${type} ${file}"`);
 };
 
 const setup = () => {
@@ -161,6 +161,32 @@ test('should use provided pre-release id', async t => {
   config.preRelease = 'alpha';
   const { version } = await runTasks(config, container);
   assert.equal(version, '1.1.0-alpha.0');
+});
+
+test('should follow conventional commit strategy with prereleaase', async t => {
+  setup();
+  sh.exec(`git tag 1.2.1`);
+  add('feat', 'baz');
+
+  const [config, container] = getOptions({ preset: { name: 'conventionalcommits' } }, { commit: true, tag: true });
+  config.preRelease = 'alpha';
+  const { version: version1 } = await runTasks(config, container);
+  assert.equal(version1, '1.3.0-alpha.0');
+
+  add('fix', 'buz');
+
+  const { version: version2 } = await runTasks(config, container);
+  assert.equal(version2, '1.3.0-alpha.1');
+
+  add('feat', 'biz', { breaking: true });
+
+  const { version: version3 } = await runTasks(config, container);
+  assert.equal(version3, '2.0.0-alpha.0');
+
+  add('fix', 'boz');
+
+  const { version: version4 } = await runTasks(config, container);
+  assert.equal(version4, '2.0.0-alpha.1');
 });
 
 test('should use provided pre-release id (pre-release continuation)', async t => {
