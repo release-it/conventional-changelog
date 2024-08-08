@@ -5,6 +5,7 @@ import conventionalRecommendedBump from 'conventional-recommended-bump';
 import conventionalChangelog from 'conventional-changelog';
 import semver from 'semver';
 import concat from 'concat-stream';
+import gitSemverTags from 'git-semver-tags';
 
 class ConventionalChangelog extends Plugin {
   static disablePlugin(options) {
@@ -46,11 +47,40 @@ class ConventionalChangelog extends Plugin {
       if (increment && semver.valid(increment)) {
         return increment;
       } else if (isPreRelease) {
-        const type =
-          releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))
-            ? `pre${releaseType}`
-            : 'prerelease';
-        return semver.inc(latestVersion, type, preReleaseId);
+        if (releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))) {
+          return semver.inc(latestVersion, `pre${releaseType}`, preReleaseId);
+        }
+
+        const tags = await gitSemverTags({
+          lernaTags: !!options.lernaPackage,
+          package: options.lernaPackage,
+          tagPrefix: options.tagPrefix,
+          skipUnstable: true,
+          cwd: options.cwd
+        });
+
+        const { releaseType: releaseTypeToLastNonPrerelease } = await conventionalRecommendedBump({
+          ...options,
+          skipUnstable: true
+        });
+
+        const lastStableTag = tags.length > 0 ? tags[0] : null;
+
+        if (
+          lastStableTag &&
+          (releaseTypeToLastNonPrerelease == 'major' ||
+            releaseTypeToLastNonPrerelease == 'minor' ||
+            releaseTypeToLastNonPrerelease == 'patch')
+        ) {
+          if (
+            semver[releaseTypeToLastNonPrerelease](lastStableTag) ==
+            semver[releaseTypeToLastNonPrerelease](latestVersion)
+          ) {
+            return semver.inc(latestVersion, `pre${releaseTypeToLastNonPrerelease}`, preReleaseId);
+          }
+        }
+
+        return semver.inc(latestVersion, 'prerelease', preReleaseId);
       } else if (releaseType) {
         return semver.inc(latestVersion, releaseType, preReleaseId);
       } else {
