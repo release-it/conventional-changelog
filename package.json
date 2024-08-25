@@ -52,7 +52,7 @@
     "release-it": "^17.0.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": "^18.18.0 || ^20.9.0 || ^22.0.0"
   },
   "release-it": {
     "hooks": {
