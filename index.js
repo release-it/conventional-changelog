@@ -5,7 +5,7 @@ import conventionalRecommendedBump from 'conventional-recommended-bump';
 import conventionalChangelog from 'conventional-changelog';
 import semver from 'semver';
 import concat from 'concat-stream';
-import gitSemverTags from 'git-semver-tags';
+import { getSemverTags } from 'git-semver-tags';
 
 class ConventionalChangelog extends Plugin {
   static disablePlugin(options) {
@@ -51,7 +51,7 @@ class ConventionalChangelog extends Plugin {
           return semver.inc(latestVersion, `pre${releaseType}`, preReleaseId);
         }
 
-        const tags = await gitSemverTags({
+        const tags = await getSemverTags({
           lernaTags: !!options.lernaPackage,
           package: options.lernaPackage,
           tagPrefix: options.tagPrefix,
