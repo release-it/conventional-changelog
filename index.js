@@ -13,8 +13,9 @@ class ConventionalChangelog extends Plugin {
   }
 
   getInitialOptions(options, namespace) {
-    const tagName = options.git ? options.git.tagName : null;
-    options[namespace].tagPrefix = tagName ? tagName.replace(/v?\$\{version\}$/, '') : '';
+    const { tagPrefix, tagName }  = options.git ?? {};
+    const tagNameNoVersion = tagName ? tagName.replace(/v?\$\{version\}$/, '') : '';
+    options[namespace].tagPrefix = tagPrefix ?? tagNameNoVersion;
     return options[namespace];
   }
 
@@ -36,8 +37,14 @@ class ConventionalChangelog extends Plugin {
     const { options } = this;
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
     this.debug('conventionalRecommendedBump', { options });
+    let { tagPrefix } = options
+    const npmName = this.config.getContext('npm.name')
+    if (tagPrefix && npmName) {
+      tagPrefix = tagPrefix.replace(/\$\{npm\.name\}/, npmName)
+    }
+    const updatedOptions = { ...options, tagPrefix }
     try {
-      const result = await conventionalRecommendedBump(options, options?.parserOpts);
+      const result = await conventionalRecommendedBump(updatedOptions, options?.parserOpts);
       this.debug({ result });
       let { releaseType } = result;
       if (increment) {
