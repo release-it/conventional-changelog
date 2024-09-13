@@ -1,7 +1,7 @@
 import { EOL } from 'os';
 import fs from 'fs';
 import { Plugin } from 'release-it';
-import conventionalRecommendedBump from 'conventional-recommended-bump';
+import { Bumper } from 'conventional-recommended-bump';
 import conventionalChangelog from 'conventional-changelog';
 import semver from 'semver';
 import concat from 'concat-stream';
@@ -37,7 +37,27 @@ class ConventionalChangelog extends Plugin {
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
     this.debug('conventionalRecommendedBump', { options });
     try {
-      const result = await conventionalRecommendedBump(options, options?.parserOpts);
+      let bumper = new Bumper(process.cwd());
+      if (options.preset) bumper = bumper.loadPreset(options.preset);
+      if (options.tagPrefix || options.skipUnstable || options.clean) {
+        bumper = bumper.tag({
+          prefix: options.tagPrefix,
+          skipUnstable: options.skipUnstable,
+          clean: options.clean
+        });
+      }
+      if (options.filterReverts || options.path || options.from || options.to || options.format || options.ignore) {
+        bumper = bumper.commits({
+          ...(options.filterReverts ? { filterReverts: options.filterReverts } : {}),
+          ...(options.path ? { path: options.path } : {}),
+          ...(options.from ? { from: options.from } : {}),
+          ...(options.to ? { to: options.to } : {}),
+          ...(options.format ? { format: options.format } : {}),
+          ...(options.ignore ? { ignore: options.ignore } : {})
+        });
+      }
+
+      const result = await bumper.bump(options.whatBump);
       this.debug({ result });
       let { releaseType } = result;
       if (increment) {
@@ -59,10 +79,13 @@ class ConventionalChangelog extends Plugin {
           cwd: options.cwd
         });
 
-        const { releaseType: releaseTypeToLastNonPrerelease } = await conventionalRecommendedBump({
-          ...options,
-          skipUnstable: true
+        bumper = bumper.tag({
+          prefix: options.tagPrefix,
+          skipUnstable: true,
+          clean: options.clean
         });
+
+        const { releaseType: releaseTypeToLastNonPrerelease } = await bumper.bump(options.whatBump);
 
         const lastStableTag = tags.length > 0 ? tags[0] : null;
 
