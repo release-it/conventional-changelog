@@ -64,7 +64,7 @@ class ConventionalChangelog extends Plugin {
           skipUnstable: true
         });
 
-        const lastStableTag = tags.length > 0 ? tags[0] : null;
+        const lastStableTag = tags.length > 0 ? tags[0].replace(options.tagPrefix, '') : null;
 
         if (
           lastStableTag &&
