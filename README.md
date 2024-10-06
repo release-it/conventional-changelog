@@ -40,6 +40,7 @@ and
 - [`bumperCommitsOpts`](#bumpercommitsopts)
 - [`bumperTagOpts`](#bumpertagopts)
 - [`bumperParserOpts`](#bumperparseropts)
+- [`whatBump`](#whatbump)
 
 ### `preset`
 
@@ -245,6 +246,11 @@ This option will be passed as the first argument to
 
 This option will be passed as the second argument to
 [`bumper.parserOptions`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
+
+### `whatBump`
+
+This option will be passed as the first argument to
+[`bumper.bump`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
 
 ## Command-line
 
