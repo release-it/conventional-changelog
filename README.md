@@ -26,6 +26,21 @@ Options are passed verbatim to
 and
 [conventional-changelog-core](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#api).
 
+### Contents
+
+- [`infile`](#infile)
+- [`header`](#header)
+- [`ignoreRecommendedBump`](#ignorerecommendedbump)
+- [`strictSemVer`](#strictsemver)
+- [`preset`](#preset)
+- [`context`](#context)
+- [`gitRawCommitsOpts`](#gitrawcommitsopts)
+- [`parserOpts`](#parseropts)
+- [`writerOpts`](#writeropts)
+- [`bumperCommitsOpts`](#bumpercommitsopts)
+- [`bumperTagOpts`](#bumpertagopts)
+- [`bumperParserOpts`](#bumperparseropts)
+
 ### `preset`
 
 Use one of:
@@ -68,6 +83,9 @@ Use an object with `name` and `types` to use a custom preset:
 See the
 [Conventional Changelog Configuration Spec (v2.1.0)](https://github.com/conventional-changelog/conventional-changelog-config-spec/blob/master/versions/2.1.0/README.md)
 for the configuration object to pass as `preset`.
+
+This is also passed as the first argument to
+[`bumper.loadPreset`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api).
 
 ### `infile`
 
@@ -212,6 +230,21 @@ module.exports = {
   }
 };
 ```
+
+### `bumperTagOpts`
+
+This option will be passed as the first argument to
+[`bumper.tag`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
+
+### `bumperCommitsOpts`
+
+This option will be passed as the first argument to
+[`bumper.commits`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
+
+### `bumperParserOpts`
+
+This option will be passed as the second argument to
+[`bumper.parserOptions`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
 
 ## Command-line
 

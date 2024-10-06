@@ -1,4 +1,4 @@
-import test from 'bron';
+import test from 'node:test';
 import { strict as assert } from 'assert';
 import fs from 'fs';
 import path from 'path';

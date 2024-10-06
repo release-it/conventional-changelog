@@ -8,7 +8,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "bron test.js --serial",
+    "test": "node --test test.js",
     "release": "release-it"
   },
   "keywords": [
@@ -35,17 +35,16 @@
   },
   "dependencies": {
     "concat-stream": "^2.0.0",
-    "conventional-changelog": "^5.1.0",
-    "conventional-recommended-bump": "^9.0.0",
+    "conventional-changelog": "^6.0.0",
+    "conventional-recommended-bump": "^10.0.0",
     "git-semver-tags": "^8.0.0",
     "semver": "^7.6.3"
   },
   "devDependencies": {
-    "bron": "^2.0.3",
     "installed-check": "^9.3.0",
-    "release-it": "^17.6.0",
+    "release-it": "^17.7.0",
     "shelljs": "^0.8.5",
-    "sinon": "^18.0.1",
+    "sinon": "^19.0.2",
     "tmp": "^0.2.3"
   },
   "peerDependencies": {

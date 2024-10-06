@@ -1,7 +1,7 @@
 import { EOL } from 'os';
 import fs from 'fs';
 import { Plugin } from 'release-it';
-import conventionalRecommendedBump from 'conventional-recommended-bump';
+import { Bumper } from 'conventional-recommended-bump';
 import conventionalChangelog from 'conventional-changelog';
 import semver from 'semver';
 import concat from 'concat-stream';
@@ -37,13 +37,25 @@ class ConventionalChangelog extends Plugin {
     this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
     this.debug('conventionalRecommendedBump', { options });
     try {
-      const result = await conventionalRecommendedBump(options, options?.parserOpts);
+      const bumper = new Bumper();
+
+      if (options.preset) bumper.loadPreset(options.preset);
+
+      if (options.bumperTagOpts) bumper.tag(options.bumperTagOpts);
+
+      if (options.bumperCommitsOpts) bumper.commits(options.bumperCommitsOpts, options.bumperParserOpts); // paramsOrCommits, parserOptions
+
+      const result = await bumper.bump(options.whatBump);
+
       this.debug({ result });
+
       let { releaseType } = result;
+
       if (increment) {
         this.log.warn(`The recommended bump is "${releaseType}", but is overridden with "${increment}".`);
         releaseType = increment;
       }
+
       if (increment && semver.valid(increment)) {
         return increment;
       } else if (isPreRelease) {
@@ -59,10 +71,9 @@ class ConventionalChangelog extends Plugin {
           cwd: options.cwd
         });
 
-        const { releaseType: releaseTypeToLastNonPrerelease } = await conventionalRecommendedBump({
-          ...options,
-          skipUnstable: true
-        });
+        bumper.tag({ ...options.bumperTagOpts, skipUnstable: true });
+
+        const { releaseType: releaseTypeToLastNonPrerelease } = await bumper.bump(options.whatBump);
 
         const lastStableTag = tags.length > 0 ? tags[0] : null;
 
