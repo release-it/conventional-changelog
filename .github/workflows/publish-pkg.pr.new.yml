@@ -21,4 +21,4 @@ jobs:
         with:
           node-version: 22
 
-      - run: npx pkg-pr-new publish
+      - run: npx pkg-pr-new publish --compact
