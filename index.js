@@ -41,9 +41,9 @@ class ConventionalChangelog extends Plugin {
 
       if (options.preset) bumper.loadPreset(options.preset);
 
-      if (options.bumperTagOpts) bumper.tag(options.bumperTagOpts);
+      if (options.tagOpts) bumper.tag(options.tagOpts);
 
-      if (options.bumperCommitsOpts) bumper.commits(options.bumperCommitsOpts, options.bumperParserOpts); // paramsOrCommits, parserOptions
+      if (options.commitsOpts) bumper.commits(options.commitsOpts, options.parserOpts);
 
       const result = await bumper.bump(options.whatBump);
 
@@ -71,7 +71,7 @@ class ConventionalChangelog extends Plugin {
           cwd: options.cwd
         });
 
-        bumper.tag({ ...options.bumperTagOpts, skipUnstable: true });
+        bumper.tag({ ...options.tagOpts, skipUnstable: true });
 
         const { releaseType: releaseTypeToLastNonPrerelease } = await bumper.bump(options.whatBump);
 
