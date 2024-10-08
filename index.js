@@ -75,7 +75,7 @@ class ConventionalChangelog extends Plugin {
 
         const { releaseType: releaseTypeToLastNonPrerelease } = await bumper.bump(options.whatBump);
 
-        const lastStableTag = tags.length > 0 ? tags[0] : null;
+        const lastStableTag = tags.length > 0 ? tags[0].replace(options.tagPrefix, '') : null;
 
         if (
           lastStableTag &&

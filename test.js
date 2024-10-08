@@ -189,6 +189,34 @@ test('should follow conventional commit strategy with prereleaase', async t => {
   assert.equal(version4, '2.0.0-alpha.1');
 });
 
+test.only('should follow conventional commit strategy with prereleaase and custom prefix', async t => {
+  setup();
+  const prefix = 'scope/';
+  sh.exec(`git tag ${prefix}v1.2.1`);
+  add('feat', 'baz');
+
+  const [config, container] = getOptions({ preset: { name: 'conventionalcommits' } }, { commit: true, tag: true });
+  config.preRelease = 'alpha';
+  config.git.tagName = `${prefix}v${'${version}'}`;
+  const { version: version1 } = await runTasks(config, container);
+  assert.equal(version1, '1.3.0-alpha.0');
+
+  add('fix', 'buz');
+
+  const { version: version2 } = await runTasks(config, container);
+  assert.equal(version2, '1.3.0-alpha.1');
+
+  add('feat', 'biz', { breaking: true });
+
+  const { version: version3 } = await runTasks(config, container);
+  assert.equal(version3, '2.0.0-alpha.0');
+
+  add('fix', 'boz');
+
+  const { version: version4 } = await runTasks(config, container);
+  assert.equal(version4, '2.0.0-alpha.1');
+});
+
 test('should use provided pre-release id (pre-release continuation)', async t => {
   setup();
   sh.exec(`git tag 1.0.1-alpha.0`);
