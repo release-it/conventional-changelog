@@ -21,30 +21,31 @@ In the [release-it](https://github.com/release-it/release-it) config, for exampl
 }
 ```
 
-Options are passed verbatim to
-[conventional-recommended-bump](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-recommended-bump#readme)
-and
-[conventional-changelog-core](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#api).
+The plugin is a wrapper around conventional-changelog packages
+[conventional-recommended-bump](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-recommended-bump#readme),
+[conventional-changelog-core](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#api)
+and more.
 
-### Contents
+## Contents
 
-- [`infile`](#infile)
-- [`header`](#header)
-- [`ignoreRecommendedBump`](#ignorerecommendedbump)
-- [`strictSemVer`](#strictsemver)
 - [`preset`](#preset)
-- [`context`](#context)
-- [`gitRawCommitsOpts`](#gitrawcommitsopts)
-- [`parserOpts`](#parseropts)
-- [`writerOpts`](#writeropts)
-- [`bumperCommitsOpts`](#bumpercommitsopts)
-- [`bumperTagOpts`](#bumpertagopts)
-- [`bumperParserOpts`](#bumperparseropts)
-- [`whatBump`](#whatbump)
+- Bump
+  - [`commitsOpts`](#commitsopts)
+  - [`tagOpts`](#tagopts)
+  - [`whatBump`](#whatbump)
+  - [`ignoreRecommendedBump`](#ignorerecommendedbump)
+  - [`strictSemVer`](#strictsemver)
+- Changelog
+  - [`infile`](#infile)
+  - [`header`](#header)
+  - [`context`](#context)
+  - [`gitRawCommitsOpts`](#gitrawcommitsopts)
+  - [`parserOpts`](#parseropts)
+  - [`writerOpts`](#writeropts)
 
 ### `preset`
 
-Use one of:
+For `preset.name`, use one of:
 
 - `angular`
 - `atom`
@@ -81,12 +82,55 @@ Use an object with `name` and `types` to use a custom preset:
 }
 ```
 
+This is passed as the first argument to
+[`bumper.loadPreset`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
+(in both bumper and changelog writer).
+
 See the
 [Conventional Changelog Configuration Spec (v2.1.0)](https://github.com/conventional-changelog/conventional-changelog-config-spec/blob/master/versions/2.1.0/README.md)
 for the configuration object to pass as `preset`.
 
-This is also passed as the first argument to
-[`bumper.loadPreset`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api).
+## Bump
+
+### `tagOpts`
+
+- This option will be passed as the first argument to
+  [`bumper.tag`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
+- [Type definition for `tagOpts` → look for `GetSemverTagsParams`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/git-client/src/types.ts)
+
+### `commitsOpts`
+
+- This option will be passed as the first argument to
+  [`bumper.commits`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
+- [Type definition for `commitsOpts` → look for `GetCommitsParams`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/git-client/src/types.ts)
+
+### `whatBump`
+
+- This option will be passed as the first argument to
+  [`bumper.bump`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
+- [Type definition for `whatBump` → look for `Preset['whatBump']`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/src/types.ts)
+
+### `ignoreRecommendedBump`
+
+Default value: `false`
+
+Use `true` to ignore the recommended bump, and use the version provided by release-it (command line argument or prompt).
+
+Note that the changelog preview shows the recommended bump, as the desired version isn't known yet in the release-it
+process. The `infile` will have the correct version.
+
+### `strictSemVer`
+
+Default value: `false`
+
+Use `true` to strictly follow semver, also in consecutive pre-releases. This means that from a pre-release, a
+recommended bump will result in a next pre-release for the next version.
+
+For example, from `1.0.0-alpha.0` a recommended bump of `minor` will result in a `preminor` bump to `1.1.0-alpha.0`.
+
+The default behavior results in a `prerelease` bump to `1.0.0-alpha.1`.
+
+## Changelog
 
 ### `infile`
 
@@ -115,25 +159,6 @@ Set the main header for the changelog document:
   }
 }
 ```
-
-### `ignoreRecommendedBump`
-
-Default value: `false`
-
-Use `true` to ignore the recommended bump, and use the version provided by release-it (command line argument or prompt).
-
-(Note that the changelog preview shows the recommended bump, as the desired version isn't known yet. The `infile` will
-have the correct version.)
-
-### `strictSemVer`
-
-Default value: `false`
-
-Use `true` to strictly follow semver, also in consecutive pre-releases. This means that from a pre-release, a
-recommended bump will result in a next pre-release for the next version.
-
-For example, from `1.0.0-alpha.0` a recommended bump of `minor` will result in a `preminor` bump to `1.1.0-alpha.0`
-(whereas the default behavior without this flag results in a `prerelease` bump to `1.0.0-alpha.1`).
 
 ### `context`
 
@@ -175,10 +200,13 @@ For example, you can use the following option to include merge commits into chan
 
 ### `parserOpts`
 
-Default value: `undefined`
+- Default value: `undefined`
+- Options for
+  [`conventional-commits-parser`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-commits-parser#api)
+- This option will also be passed as the second argument to
+  [`bumper.parserOptions`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
+- [Type definition for `parserOpts` → look for `ParserOptions`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-commits-parser/src/types.ts)
 
-Options for
-[`conventional-commits-parser`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-commits-parser#api).
 For example, you can use the following option to set the merge pattern during parsing the commit message:
 
 ```json
@@ -195,10 +223,11 @@ For example, you can use the following option to set the merge pattern during pa
 
 ### `writerOpts`
 
-Default value: `undefined`
+- Default value: `undefined`
+- Options for
+  [`conventional-changelog-writer`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer#api)
+- [Type definition for `writerOpts` → look for `Options`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-changelog-writer/src/types/options.ts)
 
-Options for
-[`conventional-changelog-writer`](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer#api).
 For example, you can use the following option to group the commits by 'scope' instead of 'type' by default.
 
 ```json
@@ -231,26 +260,6 @@ module.exports = {
   }
 };
 ```
-
-### `bumperTagOpts`
-
-This option will be passed as the first argument to
-[`bumper.tag`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
-
-### `bumperCommitsOpts`
-
-This option will be passed as the first argument to
-[`bumper.commits`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
-
-### `bumperParserOpts`
-
-This option will be passed as the second argument to
-[`bumper.parserOptions`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
-
-### `whatBump`
-
-This option will be passed as the first argument to
-[`bumper.bump`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
 
 ## Command-line
 
