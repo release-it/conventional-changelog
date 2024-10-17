@@ -51,6 +51,10 @@ class ConventionalChangelog extends Plugin {
 
       let { releaseType } = result;
 
+      if (releaseType == undefined) {
+         return;
+      }
+
       if (increment) {
         this.log.warn(`The recommended bump is "${releaseType}", but is overridden with "${increment}".`);
         releaseType = increment;
