@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "installed-check": "^9.3.0",
-    "release-it": "^17.8.2",
+    "release-it": "^17.10.0",
     "shelljs": "^0.8.5",
     "sinon": "^19.0.2",
     "tmp": "^0.2.3"
