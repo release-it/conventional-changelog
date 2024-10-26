@@ -39,7 +39,7 @@ class ConventionalChangelog extends Plugin {
     try {
       const bumper = new Bumper();
 
-      if (options.preset) bumper.loadPreset(options.preset);
+      if (options.preset) await bumper.loadPreset(options.preset).preset;
 
       if (options.tagOpts) bumper.tag(options.tagOpts);
 
@@ -52,7 +52,7 @@ class ConventionalChangelog extends Plugin {
       let { releaseType } = result;
 
       if (releaseType == undefined) {
-         return;
+        return;
       }
 
       if (increment) {
