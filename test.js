@@ -370,6 +370,18 @@ test('should not bump when recommended bump returns null', async () => {
   }
 });
 
+test('should not bump when whatBump === "undefined"', async () => {
+  setup();
+  sh.exec(`git tag 1.0.0`);
+  add('fix', 'bar');
+  add('feat', 'baz');
+  {
+    const options = getOptions({ whatBump: 'undefined' });
+    const { version } = await runTasks(...options);
+    assert.equal(version, undefined);
+  }
+});
+
 // TODO Prepare test and verify results influenced by parserOpts and writerOpts
 test.skip('should pass parserOpts and writerOpts', async t => {
   setup();
