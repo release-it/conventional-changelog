@@ -53,9 +53,7 @@ class ConventionalChangelog extends Plugin {
 
           if (bumperPreset === null) return () => ({ releaseType: null });
 
-          const whatBump = bumperPreset.whatBump ? bumperPreset.whatBump : bumperPreset.recommendedBumpOpts.whatBump;
-
-          return whatBump;
+          return bumperPreset.whatBump || bumperPreset.recommendedBumpOpts.whatBump;
         }
       }
 
