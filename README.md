@@ -109,13 +109,13 @@ for the configuration object to pass as `preset`.
 - This option will be passed as the first argument to
   [`bumper.bump`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api)
 - [Type definition for `whatBump` → look for `Preset['whatBump']`](https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/src/types.ts)
-- Use the `"undefined"` string value to skip releasing a new version.
+- Use the `false` Boolean value to skip releasing a new version.
 
 ```json
 {
   "plugins": {
     "@release-it/conventional-changelog": {
-      "whatBump": "undefined"
+      "whatBump": false
     }
   }
 }

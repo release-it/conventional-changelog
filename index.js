@@ -46,8 +46,8 @@ class ConventionalChangelog extends Plugin {
       if (options.commitsOpts) bumper.commits(options.commitsOpts, options.parserOpts);
 
       async function getWhatBump() {
-        if (options.whatBump === 'undefined') {
-          return () => ({ releaseType: undefined });
+        if (options.whatBump === false) {
+          return () => ({ releaseType: null });
         } else {
           const bumperPreset = await bumper.preset;
 
