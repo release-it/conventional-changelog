@@ -1,5 +1,5 @@
-import { EOL } from 'os';
-import fs from 'fs';
+import { EOL } from 'node:os';
+import fs from 'node:fs';
 import { Plugin } from 'release-it';
 import { Bumper } from 'conventional-recommended-bump';
 import conventionalChangelog from 'conventional-changelog';
@@ -48,20 +48,19 @@ class ConventionalChangelog extends Plugin {
       async function getWhatBump() {
         if (options.whatBump === false) {
           return () => ({ releaseType: null });
-        } else {
-          const bumperPreset = await bumper.preset;
-
-          if (bumperPreset === null) return () => ({ releaseType: null });
-
-          return bumperPreset.whatBump || bumperPreset.recommendedBumpOpts.whatBump;
         }
+        const bumperPreset = await bumper.preset;
+
+        if (bumperPreset === null) return () => ({ releaseType: null });
+
+        return bumperPreset.whatBump || bumperPreset.recommendedBumpOpts.whatBump;
       }
 
-      const result = await bumper.bump(await getWhatBump());
+      const recommendation = await bumper.bump(await getWhatBump());
 
-      this.debug({ result });
+      this.debug({ result: recommendation });
 
-      let { releaseType } = result;
+      let { releaseType } = recommendation;
 
       if (increment) {
         this.log.warn(`The recommended bump is "${releaseType}", but is overridden with "${increment}".`);
@@ -70,7 +69,9 @@ class ConventionalChangelog extends Plugin {
 
       if (increment && semver.valid(increment)) {
         return increment;
-      } else if (isPreRelease) {
+      }
+
+      if (isPreRelease) {
         if (releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))) {
           return semver.inc(latestVersion, `pre${releaseType}`, preReleaseId);
         }
@@ -91,9 +92,9 @@ class ConventionalChangelog extends Plugin {
 
         if (
           lastStableTag &&
-          (releaseTypeToLastNonPrerelease == 'major' ||
-            releaseTypeToLastNonPrerelease == 'minor' ||
-            releaseTypeToLastNonPrerelease == 'patch')
+          (releaseTypeToLastNonPrerelease === 'major' ||
+            releaseTypeToLastNonPrerelease === 'minor' ||
+            releaseTypeToLastNonPrerelease === 'patch')
         ) {
           if (
             semver[releaseTypeToLastNonPrerelease](lastStableTag) ==
@@ -104,11 +105,13 @@ class ConventionalChangelog extends Plugin {
         }
 
         return semver.inc(latestVersion, 'prerelease', preReleaseId);
-      } else if (releaseType) {
-        return semver.inc(latestVersion, releaseType, preReleaseId);
-      } else {
-        return null;
       }
+
+      if (releaseType) {
+        return semver.inc(latestVersion, releaseType, preReleaseId);
+      }
+
+      return null;
     } catch (err) {
       this.debug({ err });
       throw err;
