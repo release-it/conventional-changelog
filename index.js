@@ -39,21 +39,29 @@ class ConventionalChangelog extends Plugin {
     try {
       const bumper = new Bumper();
 
-      if (options.preset) bumper.loadPreset(options.preset);
+      if (options.preset) await bumper.loadPreset(options.preset).preset;
 
       if (options.tagOpts) bumper.tag(options.tagOpts);
 
       if (options.commitsOpts) bumper.commits(options.commitsOpts, options.parserOpts);
 
-      const result = await bumper.bump(options.whatBump);
+      async function getWhatBump() {
+        if (options.whatBump === false) {
+          return () => ({ releaseType: null });
+        } else {
+          const bumperPreset = await bumper.preset;
+
+          if (bumperPreset === null) return () => ({ releaseType: null });
+
+          return bumperPreset.whatBump || bumperPreset.recommendedBumpOpts.whatBump;
+        }
+      }
+
+      const result = await bumper.bump(await getWhatBump());
 
       this.debug({ result });
 
       let { releaseType } = result;
-
-      if (releaseType == undefined) {
-         return;
-      }
 
       if (increment) {
         this.log.warn(`The recommended bump is "${releaseType}", but is overridden with "${increment}".`);
