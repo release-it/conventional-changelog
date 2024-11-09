@@ -384,11 +384,16 @@ test('should not bump when whatBump === false', async () => {
 
 test('should use given whatBump when provided',  async () => {
   setup();
+  sh.exec(`git tag 1.0.0`);
+  add('fix', 'bar');
   const whatBump = mock.fn()
   {
     const options = getOptions({ whatBump });
     await runTasks(...options);
     assert.ok(whatBump.mock.callCount() > 1)
+    const commitHeaders = whatBump.mock.calls[0].arguments[0]?.map((commit) => commit.header)
+    assert.strictEqual(commitHeaders.length, 1)
+    assert.match(commitHeaders[0], /^fix\(bar\):/)
   }
 });
 
