@@ -1,4 +1,4 @@
-import test from 'node:test';
+import {mock, test} from 'node:test';
 import { strict as assert } from 'assert';
 import fs from 'fs';
 import path from 'path';
@@ -379,6 +379,16 @@ test('should not bump when whatBump === false', async () => {
     const options = getOptions({ whatBump: false });
     const { version } = await runTasks(...options);
     assert.equal(version, undefined);
+  }
+});
+
+test('should use given whatBump when provided',  async () => {
+  setup();
+  const whatBump = mock.fn()
+  {
+    const options = getOptions({ whatBump });
+    await runTasks(...options);
+    assert.ok(whatBump.mock.callCount() > 1)
   }
 });
 
