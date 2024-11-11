@@ -48,6 +48,8 @@ class ConventionalChangelog extends Plugin {
       async function getWhatBump() {
         if (options.whatBump === false) {
           return () => ({ releaseType: null });
+        } else if (typeof options.whatBump === 'function') {
+          return options.whatBump;
         }
         const bumperPreset = await bumper.preset;
 
