@@ -1,8 +1,8 @@
-import {mock, test} from 'node:test';
-import { strict as assert } from 'assert';
-import fs from 'fs';
-import path from 'path';
-import { EOL } from 'os';
+import { mock, test } from 'node:test';
+import { strict as assert } from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import { EOL } from 'node:os';
 import sh from 'shelljs';
 import tmp from 'tmp';
 import semver from 'semver';
@@ -382,18 +382,18 @@ test('should not bump when whatBump === false', async () => {
   }
 });
 
-test('should use given whatBump when provided',  async () => {
+test('should use given whatBump when provided', async () => {
   setup();
   sh.exec(`git tag 1.0.0`);
   add('fix', 'bar');
-  const whatBump = mock.fn()
+  const whatBump = mock.fn();
   {
     const options = getOptions({ whatBump });
     await runTasks(...options);
-    assert.ok(whatBump.mock.callCount() > 1)
-    const commitHeaders = whatBump.mock.calls[0].arguments[0]?.map((commit) => commit.header)
-    assert.strictEqual(commitHeaders.length, 1)
-    assert.match(commitHeaders[0], /^fix\(bar\):/)
+    assert.ok(whatBump.mock.callCount() > 1);
+    const commitHeaders = whatBump.mock.calls[0].arguments[0]?.map(commit => commit.header);
+    assert.strictEqual(commitHeaders.length, 1);
+    assert.match(commitHeaders[0], /^fix\(bar\):/);
   }
 });
 
