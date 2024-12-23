@@ -166,7 +166,7 @@ class ConventionalChangelog extends Plugin {
   }
 
   async writeChangelog() {
-    const { infile, header: _header = '' } = this.options;
+    const { infile, header: _header = '# Changelog' } = this.options;
     let { changelog } = this.config.getContext();
     const header = _header.split(/\r\n|\r|\n/g).join(EOL);
 

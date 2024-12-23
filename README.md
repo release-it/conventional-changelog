@@ -146,6 +146,8 @@ Default value: `undefined`
 
 ### `header`
 
+Default value: `"# Changelog"`
+
 Set the main header for the changelog document:
 
 ```json
