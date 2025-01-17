@@ -112,6 +112,20 @@ See the [Conventional Changelog Configuration Spec (v2.1.0)][17] for the configu
 }
 ```
 
+- Use a function to manually provide a bump:
+
+```js
+module.exports = {
+  plugins: {
+    '@release-it/conventional-changelog': {
+      whatBump: function () {
+        return { releaseType: '10.0.1' };
+      }
+    }
+  }
+};
+```
+
 ### `ignoreRecommendedBump`
 
 Default value: `false`
