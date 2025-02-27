@@ -24,6 +24,21 @@ In the [release-it][1] config, for example:
 The plugin is a wrapper around conventional-changelog packages [conventional-recommended-bump][2],
 [conventional-changelog-core][3] and more.
 
+> [!IMPORTANT]
+>
+> For the `conventionalcommits` preset, you may need to override the version
+> of the transitive `conventional-changelog-conventionalcommits` dependency, like so:
+>
+> ```json
+> {
+>   "overrides": {
+>     "conventional-changelog-conventionalcommits": "8.0.0"
+>   }
+> }
+> ```
+>
+> Use `"resolutions"` for pnpm or Yarn.
+
 ## Contents
 
 - [`preset`][4]
