@@ -23,18 +23,24 @@ class ConventionalChangelog extends Plugin {
     if (!this.config.isIncrement) {
       this.setContext({ version: latestVersion });
     } else {
-      const { increment, isPreRelease, preReleaseId } = this.config.getContext('version');
-      const version = await this.getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId });
+      const { increment, isPreRelease, preReleaseId, preReleaseBase } = this.config.getContext('version');
+      const version = await this.getRecommendedVersion({
+        increment,
+        latestVersion,
+        isPreRelease,
+        preReleaseId,
+        preReleaseBase
+      });
       this.setContext({ version });
     }
     return this.generateChangelog();
   }
 
-  async getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId }) {
+  async getRecommendedVersion({ increment, latestVersion, isPreRelease, preReleaseId, preReleaseBase }) {
     const { version } = this.getContext();
     if (version) return version;
     const { options } = this;
-    this.debug({ increment, latestVersion, isPreRelease, preReleaseId });
+    this.debug({ increment, latestVersion, isPreRelease, preReleaseId, preReleaseBase });
     this.debug('conventionalRecommendedBump', { options });
     try {
       const bumper = new Bumper();
@@ -75,7 +81,7 @@ class ConventionalChangelog extends Plugin {
 
       if (isPreRelease) {
         if (releaseType && (options.strictSemVer || !semver.prerelease(latestVersion))) {
-          return semver.inc(latestVersion, `pre${releaseType}`, preReleaseId);
+          return semver.inc(latestVersion, `pre${releaseType}`, preReleaseId, preReleaseBase);
         }
 
         const tags = await getSemverTags({
@@ -102,15 +108,15 @@ class ConventionalChangelog extends Plugin {
             semver[releaseTypeToLastNonPrerelease](lastStableTag) ==
             semver[releaseTypeToLastNonPrerelease](latestVersion)
           ) {
-            return semver.inc(latestVersion, `pre${releaseTypeToLastNonPrerelease}`, preReleaseId);
+            return semver.inc(latestVersion, `pre${releaseTypeToLastNonPrerelease}`, preReleaseId, preReleaseBase);
           }
         }
 
-        return semver.inc(latestVersion, 'prerelease', preReleaseId);
+        return semver.inc(latestVersion, 'prerelease', preReleaseId, preReleaseBase);
       }
 
       if (releaseType) {
-        return semver.inc(latestVersion, releaseType, preReleaseId);
+        return semver.inc(latestVersion, releaseType, preReleaseId, preReleaseBase);
       }
 
       return null;
