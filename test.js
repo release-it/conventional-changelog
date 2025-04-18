@@ -55,6 +55,7 @@ const setup = () => {
   sh.pushd(dir);
   sh.exec(`git init .`);
   add('fix', 'foo');
+  sh.ShellString('{ "hooks": {} }').toEnd('.release-it.json');
   return { dir };
 };
 
