@@ -164,6 +164,18 @@ test('should use provided pre-release id', async t => {
   assert.equal(version, '1.1.0-alpha.0');
 });
 
+test('should use provided pre-release base', async t => {
+  setup();
+  sh.exec(`git tag 1.0.0`);
+  add('feat', 'baz');
+
+  const [config, container] = getOptions({ preset });
+  config.preRelease = 'alpha';
+  config.preReleaseBase = '1';
+  const { version } = await runTasks(config, container);
+  assert.equal(version, '1.1.0-alpha.1');
+});
+
 test('should follow conventional commit strategy with prereleaase', async t => {
   setup();
   sh.exec(`git tag 1.2.1`);
