@@ -1,6 +1,6 @@
 {
   "name": "@release-it/conventional-changelog",
-  "version": "10.0.1",
+  "version": "10.0.2",
   "description": "Conventional changelog plugin for release-it",
   "type": "module",
   "exports": {
