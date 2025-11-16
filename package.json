@@ -34,18 +34,20 @@
     "url": "https://webpro.nl"
   },
   "dependencies": {
+    "@conventional-changelog/git-client": "^2.5.1",
     "concat-stream": "^2.0.0",
-    "conventional-changelog": "^6.0.0",
-    "conventional-recommended-bump": "^10.0.0",
-    "git-semver-tags": "^8.0.0",
-    "semver": "^7.6.3"
+    "conventional-changelog": "^7.1.1",
+    "conventional-changelog-angular": "^8.1.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "conventional-recommended-bump": "^11.2.0",
+    "semver": "^7.7.3"
   },
   "devDependencies": {
     "installed-check": "^9.3.0",
-    "release-it": "^19.0.0",
-    "shelljs": "^0.8.5",
-    "sinon": "^19.0.2",
-    "tmp": "^0.2.3"
+    "release-it": "^19.0.6",
+    "shelljs": "^0.10.0",
+    "sinon": "^21.0.0",
+    "tmp": "^0.2.5"
   },
   "peerDependencies": {
     "release-it": "^18.0.0 || ^19.0.0"

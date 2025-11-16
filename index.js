@@ -2,10 +2,55 @@ import { EOL } from 'node:os';
 import fs from 'node:fs';
 import { Plugin } from 'release-it';
 import { Bumper } from 'conventional-recommended-bump';
-import conventionalChangelog from 'conventional-changelog';
+import { ConventionalChangelog as ConventionalChangelogGenerator } from 'conventional-changelog';
+import { ConventionalGitClient } from '@conventional-changelog/git-client';
 import semver from 'semver';
 import concat from 'concat-stream';
-import { getSemverTags } from 'git-semver-tags';
+
+// Wrapper function to provide backward compatibility with the old API
+function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {}, parserOpts = {}, writerOpts = {}) {
+  const generator = new ConventionalChangelogGenerator(options.cwd || process.cwd());
+
+  // Apply options
+  if (options.preset) {
+    if (typeof options.preset === 'string') {
+      generator.loadPreset(options.preset);
+    } else if (typeof options.preset === 'object' && options.preset.name) {
+      generator.loadPreset(options.preset.name);
+    }
+  }
+
+  // Set options
+  if (options.releaseCount !== undefined || options.append !== undefined) {
+    generator.options({
+      releaseCount: options.releaseCount,
+      append: options.append
+    });
+  }
+
+  // Set context
+  if (Object.keys(context).length > 0) {
+    generator.context(context);
+  }
+
+  // Set git commit options
+  if (Object.keys(gitRawCommitsOpts).length > 0) {
+    generator.commits(gitRawCommitsOpts);
+  }
+
+  // Set parser options
+  if (Object.keys(parserOpts).length > 0) {
+    // Parser options are not directly exposed in the new API
+    // They need to be passed through config or preset
+  }
+
+  // Set writer options
+  if (Object.keys(writerOpts).length > 0) {
+    generator.writer(writerOpts);
+  }
+
+  return generator.writeStream();
+}
 
 class ConventionalChangelog extends Plugin {
   static disablePlugin(options) {
@@ -45,26 +90,24 @@ class ConventionalChangelog extends Plugin {
     try {
       const bumper = new Bumper();
 
-      if (options.preset) await bumper.loadPreset(options.preset).preset;
+      if (options.preset) bumper.loadPreset(options.preset);
 
       if (options.tagOpts) bumper.tag(options.tagOpts);
 
       if (options.commitsOpts) bumper.commits(options.commitsOpts, options.parserOpts);
 
-      async function getWhatBump() {
-        if (options.whatBump === false) {
-          return () => ({ releaseType: null });
-        } else if (typeof options.whatBump === 'function') {
-          return options.whatBump;
-        }
-        const bumperPreset = await bumper.preset;
-
-        if (bumperPreset === null) return () => ({ releaseType: null });
-
-        return bumperPreset.whatBump || bumperPreset.recommendedBumpOpts.whatBump;
+      // Determine the whatBump function to use
+      let whatBumpFn;
+      if (options.whatBump === false) {
+        whatBumpFn = () => ({ releaseType: null });
+      } else if (typeof options.whatBump === 'function') {
+        whatBumpFn = options.whatBump;
+      } else {
+        // Use the whatBump from the loaded preset (stored in bumper.whatBump)
+        whatBumpFn = bumper.whatBump;
       }
 
-      const recommendation = await bumper.bump(await getWhatBump());
+      const recommendation = await bumper.bump(whatBumpFn);
 
       this.debug({ result: recommendation });
 
@@ -84,17 +127,22 @@ class ConventionalChangelog extends Plugin {
           return semver.inc(latestVersion, `pre${releaseType}`, preReleaseId, preReleaseBase);
         }
 
-        const tags = await getSemverTags({
-          lernaTags: !!options.lernaPackage,
-          package: options.lernaPackage,
-          tagPrefix: options.tagPrefix,
-          skipUnstable: true,
-          cwd: options.cwd
+        // Use ConventionalGitClient to get semver tags
+        const gitClient = new ConventionalGitClient(options.cwd || process.cwd());
+        const tagsIterable = gitClient.getSemverTags({
+          prefix: options.tagPrefix || '',
+          skipUnstable: true
         });
+
+        // Convert async iterable to array
+        const tags = [];
+        for await (const tag of tagsIterable) {
+          tags.push(tag);
+        }
 
         bumper.tag({ ...options.tagOpts, skipUnstable: true });
 
-        const { releaseType: releaseTypeToLastNonPrerelease } = await bumper.bump(options.whatBump);
+        const { releaseType: releaseTypeToLastNonPrerelease } = await bumper.bump(whatBumpFn);
 
         const lastStableTag = tags.length > 0 ? tags[0] : null;
 
