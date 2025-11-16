@@ -11,7 +11,6 @@ import concat from 'concat-stream';
 function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {}, parserOpts = {}, writerOpts = {}) {
   const generator = new ConventionalChangelogGenerator(options.cwd || process.cwd());
 
-  // Apply options
   if (options.preset) {
     if (typeof options.preset === 'string') {
       generator.loadPreset(options.preset);
@@ -20,7 +19,6 @@ function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {
     }
   }
 
-  // Set options
   if (options.releaseCount !== undefined || options.append !== undefined) {
     generator.options({
       releaseCount: options.releaseCount,
@@ -28,23 +26,19 @@ function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {
     });
   }
 
-  // Set context
   if (Object.keys(context).length > 0) {
     generator.context(context);
   }
 
-  // Set git commit options
   if (Object.keys(gitRawCommitsOpts).length > 0) {
     generator.commits(gitRawCommitsOpts);
   }
 
-  // Set parser options
   if (Object.keys(parserOpts).length > 0) {
     // Parser options are not directly exposed in the new API
     // They need to be passed through config or preset
   }
 
-  // Set writer options
   if (Object.keys(writerOpts).length > 0) {
     generator.writer(writerOpts);
   }
@@ -96,14 +90,13 @@ class ConventionalChangelog extends Plugin {
 
       if (options.commitsOpts) bumper.commits(options.commitsOpts, options.parserOpts);
 
-      // Determine the whatBump function to use
       let whatBumpFn;
       if (options.whatBump === false) {
         whatBumpFn = () => ({ releaseType: null });
       } else if (typeof options.whatBump === 'function') {
         whatBumpFn = options.whatBump;
       } else {
-        // Use the whatBump from the loaded preset (stored in bumper.whatBump)
+        // Use the whatBump from the loaded preset
         whatBumpFn = bumper.whatBump;
       }
 
@@ -127,14 +120,12 @@ class ConventionalChangelog extends Plugin {
           return semver.inc(latestVersion, `pre${releaseType}`, preReleaseId, preReleaseBase);
         }
 
-        // Use ConventionalGitClient to get semver tags
         const gitClient = new ConventionalGitClient(options.cwd || process.cwd());
         const tagsIterable = gitClient.getSemverTags({
           prefix: options.tagPrefix || '',
           skipUnstable: true
         });
 
-        // Convert async iterable to array
         const tags = [];
         for await (const tag of tagsIterable) {
           tags.push(tag);

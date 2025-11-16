@@ -428,7 +428,6 @@ test('should pass parserOpts and writerOpts', async () => {
   const options = getOptions({ preset, parserOpts, writerOpts });
   const { changelog, version } = await runTasks(...options);
 
-  // Verify that the plugin runs successfully with custom options
   assert.equal(version, '1.1.0');
   assert.ok(changelog);
   assert.match(changelog, /fix/);
