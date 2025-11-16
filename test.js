@@ -410,9 +410,13 @@ test('should use given whatBump when provided', async () => {
   }
 });
 
-// TODO Prepare test and verify results influenced by parserOpts and writerOpts
-test.skip('should pass parserOpts and writerOpts', async t => {
+test('should pass parserOpts and writerOpts', async () => {
   setup();
+
+  sh.exec(`git tag 1.0.0`);
+  add('fix', 'bar');
+  add('feat', 'baz');
+
   const parserOpts = {
     mergePattern: /^Merge pull request #(\d+) from (.*)$/,
     mergeCorrespondence: ['id', 'source']
@@ -420,6 +424,13 @@ test.skip('should pass parserOpts and writerOpts', async t => {
   const writerOpts = {
     groupBy: 'type'
   };
-  const [config, container] = getOptions({ preset, parserOpts, writerOpts });
-  await runTasks(config, container);
+
+  const options = getOptions({ preset, parserOpts, writerOpts });
+  const { changelog, version } = await runTasks(...options);
+
+  // Verify that the plugin runs successfully with custom options
+  assert.equal(version, '1.1.0');
+  assert.ok(changelog);
+  assert.match(changelog, /fix/);
+  assert.match(changelog, /feat/);
 });
