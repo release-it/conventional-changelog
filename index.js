@@ -12,11 +12,7 @@ function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {
   const generator = new ConventionalChangelogGenerator(options.cwd || process.cwd());
 
   if (options.preset) {
-    if (typeof options.preset === 'string') {
-      generator.loadPreset(options.preset);
-    } else if (typeof options.preset === 'object' && options.preset.name) {
-      generator.loadPreset(options.preset.name);
-    }
+    generator.loadPreset(options.preset);
   }
 
   if (options.releaseCount !== undefined || options.append !== undefined) {
