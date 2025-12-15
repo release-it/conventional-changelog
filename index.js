@@ -38,6 +38,7 @@ function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {
   if (Object.keys(writerOpts).length > 0) {
     generator.writer(writerOpts);
   }
+  generator.readRepository()
 
   return generator.writeStream();
 }
