@@ -38,7 +38,12 @@ function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {
   if (Object.keys(writerOpts).length > 0) {
     generator.writer(writerOpts);
   }
-  generator.readRepository()
+
+  generator.gitClient.getConfig('remote.origin.url').then(() => {
+    generator.readRepository();
+  }).catch(() => {
+    // remote.origin.url is not set => continue without reading repository
+  })
 
   return generator.writeStream();
 }
