@@ -8,7 +8,13 @@ import semver from 'semver';
 import concat from 'concat-stream';
 
 // Wrapper function to provide backward compatibility with the old API
-function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {}, parserOpts = {}, writerOpts = {}) {
+async function conventionalChangelog(
+  options = {},
+  context = {},
+  gitRawCommitsOpts = {},
+  parserOpts = {},
+  writerOpts = {}
+) {
   const generator = new ConventionalChangelogGenerator(options.cwd || process.cwd());
 
   if (options.preset) {
@@ -39,11 +45,10 @@ function conventionalChangelog(options = {}, context = {}, gitRawCommitsOpts = {
     generator.writer(writerOpts);
   }
 
-  generator.gitClient.getConfig('remote.origin.url').then(() => {
+  try {
+    await generator.gitClient.getConfig('remote.origin.url');
     generator.readRepository();
-  }).catch(() => {
-    // remote.origin.url is not set => continue without reading repository
-  })
+  } catch {}
 
   return generator.writeStream();
 }
@@ -196,9 +201,10 @@ class ConventionalChangelog extends Plugin {
   generateChangelog(options) {
     return new Promise((resolve, reject) => {
       const resolver = result => resolve(result.toString().trim());
-      const changelogStream = this.getChangelogStream(options);
-      changelogStream.pipe(concat(resolver));
-      changelogStream.on('error', reject);
+      this.getChangelogStream(options).then(changelogStream => {
+        changelogStream.pipe(concat(resolver));
+        changelogStream.on('error', reject);
+      });
     });
   }
 
