@@ -433,3 +433,24 @@ test('should pass parserOpts and writerOpts', async () => {
   assert.match(changelog, /fix/);
   assert.match(changelog, /feat/);
 });
+
+test('should generate changelog with origin urls', async () => {
+  setup();
+  const shaLong = /[0-9a-f]{40}/.source;
+  const header = (from, to, suffix = '', url = '') =>
+    `${level(from, to)} \\[${to}\\]\\(${url}/compare/${from}${suffix}...${to}${suffix}\\) ${date}`;
+  const commit = (type, name, url) => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} \\(\\[${sha}\\]\\(${url}/commit/${shaLong}\\)\\)`;
+
+  const url = 'https://github.com/release-it/conventional-changelog';
+  sh.exec(`git tag 1.0.0`);
+  sh.exec(`git remote add origin ${url}`)
+  add('fix', 'bar');
+  add('feat', 'baz');
+
+  const options = getOptions({ preset });
+  const { changelog } = await runTasks(...options);
+  const title = header('1.0.0', '1.1.0', '', url);
+  const bar = commit('fix', 'bar', url);
+  const baz = commit('feat', 'baz', url);
+  assert.match(nl(changelog), new RegExp('^' + title + fixes + bar + features + baz + '$'));
+});
