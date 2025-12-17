@@ -61,12 +61,13 @@ const setup = () => {
 
 const date = /\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/.source;
 const sha = /[0-9a-f]{7}/.source;
+const shaLong = /[0-9a-f]{40}/.source;
 const level = (from, to) => `${/patch/.test(semver.diff(from, to)) ? '##' : '#'}`;
-const header = (from, to, suffix = '') =>
-  `${level(from, to)} \\[${to}\\]\\(/compare/${from}${suffix}...${to}${suffix}\\) ${date}`;
+const header = (from, to, suffix = '', url = '') =>
+  `${level(from, to)} \\[${to}\\]\\(${url}/compare/${from}${suffix}...${to}${suffix}\\) ${date}`;
 const features = EOL + EOL + EOL + '### Features' + EOL;
 const fixes = EOL + EOL + EOL + '### Bug Fixes' + EOL;
-const commit = (type, name) => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} ${sha}`;
+const commit = (type, name, url = '') => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} ${url ? `\\(\\[${sha}\\]\\(${url}/commit/${shaLong}\\)\\)` : sha}`;
 
 const nl = value => value.split(/\r\n|\r|\n/g).join(EOL);
 
@@ -436,10 +437,6 @@ test('should pass parserOpts and writerOpts', async () => {
 
 test('should generate changelog with origin urls', async () => {
   setup();
-  const shaLong = /[0-9a-f]{40}/.source;
-  const header = (from, to, suffix = '', url = '') =>
-    `${level(from, to)} \\[${to}\\]\\(${url}/compare/${from}${suffix}...${to}${suffix}\\) ${date}`;
-  const commit = (type, name, url) => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} \\(\\[${sha}\\]\\(${url}/commit/${shaLong}\\)\\)`;
 
   const url = 'https://github.com/release-it/conventional-changelog';
   sh.exec(`git tag 1.0.0`);
