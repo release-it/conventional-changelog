@@ -32,13 +32,8 @@ async function conventionalChangelog(
     generator.context(context);
   }
 
-  if (Object.keys(gitRawCommitsOpts).length > 0) {
-    generator.commits(gitRawCommitsOpts);
-  }
-
-  if (Object.keys(parserOpts).length > 0) {
-    // Parser options are not directly exposed in the new API
-    // They need to be passed through config or preset
+  if (Object.keys(gitRawCommitsOpts).length > 0 || Object.keys(parserOpts).length > 0) {
+    generator.commits(gitRawCommitsOpts, parserOpts);
   }
 
   if (Object.keys(writerOpts).length > 0) {
@@ -95,7 +90,9 @@ class ConventionalChangelog extends Plugin {
 
       if (options.tagOpts) bumper.tag(options.tagOpts);
 
-      if (options.commitsOpts) bumper.commits(options.commitsOpts, options.parserOpts);
+      if (options.commitsOpts || options.parserOpts) {
+        bumper.commits(options.commitsOpts || {}, options.parserOpts);
+      }
 
       let whatBumpFn;
       if (options.whatBump === false) {

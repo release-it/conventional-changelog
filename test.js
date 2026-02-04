@@ -54,6 +54,8 @@ const setup = () => {
   const dir = mkTmpDir();
   sh.pushd(dir);
   sh.exec(`git init .`);
+  // Disable GPG signing for tags in test repo (may be enabled globally)
+  sh.exec(`git config tag.gpgSign false`);
   add('fix', 'foo');
   sh.ShellString('{ "hooks": {} }').toEnd('.release-it.json');
   return { dir };
@@ -450,4 +452,49 @@ test('should generate changelog with origin urls', async () => {
   const bar = commit('fix', 'bar', url);
   const baz = commit('feat', 'baz', url);
   assert.match(nl(changelog), new RegExp('^' + title + fixes + bar + features + baz + '$'));
+});
+
+test('should apply custom issuePrefixes from parserOpts', async () => {
+  setup();
+
+  sh.exec(`git tag 1.0.0`);
+
+  // Create a commit with a custom issue reference in the body
+  sh.ShellString('bar').toEnd('bar');
+  sh.exec(`git add bar`);
+  // Use a commit with a custom issue prefix in the footer
+  sh.exec(`git commit -m "fix(bar): fix bar
+
+Refs: XYZ-123"`);
+
+  // Test 1: WITHOUT custom issuePrefixes, the parser won't recognize XYZ-123
+  // and the changelog won't show any issue reference
+  {
+    const options = getOptions({ preset });
+    const { changelog } = await runTasks(...options);
+    // Without issuePrefixes: ['XYZ-'], the parser won't detect XYZ-123 as an issue
+    // so no "closes" reference should appear
+    assert.doesNotMatch(changelog, /closes/);
+  }
+
+  // Reset and create the same commit again
+  sh.exec(`git tag 1.0.1`);
+  sh.ShellString('baz').toEnd('baz');
+  sh.exec(`git add baz`);
+  sh.exec(`git commit -m "fix(baz): fix baz
+
+Refs: XYZ-456"`);
+
+  // Test 2: WITH custom issuePrefixes, the parser recognizes XYZ-456 as an issue
+  // The angular preset outputs issues with # prefix, so we check for #456
+  {
+    const parserOpts = {
+      issuePrefixes: ['XYZ-']
+    };
+    const options = getOptions({ preset, parserOpts });
+    const { changelog } = await runTasks(...options);
+    // With issuePrefixes: ['XYZ-'], the parser detects XYZ-456 as issue 456
+    // The angular writer template outputs it as #456 (hardcoded in template)
+    assert.match(changelog, /closes.*#456/);
+  }
 });
