@@ -94,17 +94,19 @@ class ConventionalChangelog extends Plugin {
         bumper.commits(options.commitsOpts || {}, options.parserOpts);
       }
 
+      const noBump = () => ({ releaseType: null });
       let whatBumpFn;
       if (options.whatBump === false) {
-        whatBumpFn = () => ({ releaseType: null });
+        whatBumpFn = noBump;
       } else if (typeof options.whatBump === 'function') {
         whatBumpFn = options.whatBump;
-      } else {
-        // Use the whatBump from the loaded preset
-        whatBumpFn = bumper.whatBump;
+      } else if (!options.preset) {
+        whatBumpFn = noBump;
       }
 
-      const recommendation = await bumper.bump(whatBumpFn);
+      const recommendation = whatBumpFn
+        ? await bumper.bump(whatBumpFn)
+        : await bumper.bump();
 
       this.debug({ result: recommendation });
 
@@ -137,7 +139,9 @@ class ConventionalChangelog extends Plugin {
 
         bumper.tag({ ...options.tagOpts, skipUnstable: true });
 
-        const { releaseType: releaseTypeToLastNonPrerelease } = await bumper.bump(whatBumpFn);
+        const { releaseType: releaseTypeToLastNonPrerelease } = whatBumpFn
+          ? await bumper.bump(whatBumpFn)
+          : await bumper.bump();
 
         const lastStableTag = tags.length > 0 ? tags[0] : null;
 
