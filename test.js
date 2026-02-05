@@ -463,9 +463,7 @@ test('should apply custom issuePrefixes from parserOpts', async () => {
   sh.ShellString('bar').toEnd('bar');
   sh.exec(`git add bar`);
   // Use a commit with a custom issue prefix in the footer
-  sh.exec(`git commit -m "fix(bar): fix bar
-
-Refs: XYZ-123"`);
+  sh.exec(`git commit -m "fix(bar): fix bar" -m "Refs: XYZ-123"`);
 
   // Test 1: WITHOUT custom issuePrefixes, the parser won't recognize XYZ-123
   // and the changelog won't show any issue reference
@@ -481,9 +479,7 @@ Refs: XYZ-123"`);
   sh.exec(`git tag 1.0.1`);
   sh.ShellString('baz').toEnd('baz');
   sh.exec(`git add baz`);
-  sh.exec(`git commit -m "fix(baz): fix baz
-
-Refs: XYZ-456"`);
+  sh.exec(`git commit -m "fix(baz): fix baz" -m "Refs: XYZ-456"`);
 
   // Test 2: WITH custom issuePrefixes, the parser recognizes XYZ-456 as an issue
   // The angular preset outputs issues with # prefix, so we check for #456
