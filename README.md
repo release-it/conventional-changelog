@@ -22,22 +22,7 @@ In the [release-it][1] config, for example:
 ```
 
 The plugin is a wrapper around conventional-changelog packages [conventional-recommended-bump][2],
-[conventional-changelog-core][3] and more.
-
-> [!IMPORTANT]
->
-> For the `conventionalcommits` preset, you may need to override the version
-> of the transitive `conventional-changelog-conventionalcommits` dependency, like so:
->
-> ```json
-> {
->   "overrides": {
->     "conventional-changelog-conventionalcommits": "8.0.0"
->   }
-> }
-> ```
->
-> Use `"resolutions"` for pnpm or Yarn.
+[conventional-changelog][3] and more.
 
 ## Contents
 
@@ -197,7 +182,7 @@ Set the main header for the changelog document:
 
 Default value: `undefined`
 
-This option will be passed as the second argument (`context`) to [conventional-changelog-core][21], for example:
+This option will be passed as the second argument (`context`) to [conventional-changelog][21], for example:
 
 ```json
 "plugins": {
@@ -308,13 +293,13 @@ Depending on your shell or OS this may differ.
 When using this plugin in a GitHub Action, make sure to set [`fetch-depth: 0`][27] so the history is available to
 determine the correct recommended bump and changelog.
 
-Also see [https://github.com/release-it/release-it/blob/master/docs/ci.md#github-actions][28]
+Also see [https://github.com/release-it/release-it/blob/main/docs/ci.md#github-actions][28]
 
 [1]: https://github.com/release-it/release-it
 [2]:
   https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-recommended-bump#readme
 [3]:
-  https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#api
+  https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog#readme
 [4]: #preset
 [5]: #commitsopts
 [6]: #tagopts
@@ -333,9 +318,9 @@ Also see [https://github.com/release-it/release-it/blob/master/docs/ci.md#github
 [18]: https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/git-client/src/types.ts
 [19]:
   https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/src/types.ts
-[20]: https://github.com/release-it/release-it/blob/master/docs/github-releases.md
+[20]: https://github.com/release-it/release-it/blob/main/docs/github-releases.md
 [21]:
-  https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-core#context
+  https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog#readme
 [22]: https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/git-raw-commits#api
 [23]:
   https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-commits-parser#api
@@ -346,4 +331,4 @@ Also see [https://github.com/release-it/release-it/blob/master/docs/ci.md#github
 [26]:
   https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-changelog-writer/src/types/options.ts
 [27]: https://github.com/actions/checkout#fetch-all-history-for-all-tags-and-branches
-[28]: https://github.com/release-it/release-it/blob/master/docs/ci.md#github-actions
+[28]: https://github.com/release-it/release-it/blob/main/docs/ci.md#github-actions
