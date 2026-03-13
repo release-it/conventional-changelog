@@ -24,7 +24,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/release-it/conventional-changelog.git"
+    "url": "git+https://github.com/release-it/conventional-changelog.git"
   },
   "homepage": "https://github.com/release-it/conventional-changelog#readme",
   "bugs": "https://github.com/release-it/conventional-changelog/issues",
