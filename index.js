@@ -99,9 +99,11 @@ class ConventionalChangelog extends Plugin {
         whatBumpFn = () => ({ releaseType: null });
       } else if (typeof options.whatBump === 'function') {
         whatBumpFn = options.whatBump;
-      } else {
+      } else if (typeof bumper.whatBump === 'function') {
         // Use the whatBump from the loaded preset
         whatBumpFn = bumper.whatBump;
+      } else {
+        whatBumpFn = () => ({ releaseType: null });
       }
 
       const recommendation = await bumper.bump(whatBumpFn);

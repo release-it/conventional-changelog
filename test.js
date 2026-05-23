@@ -398,6 +398,18 @@ test('should not bump when whatBump === false', async () => {
   }
 });
 
+test('should not throw when no preset is configured', async () => {
+  setup();
+  sh.exec(`git tag 1.0.0`);
+  add('fix', 'bar');
+  add('feat', 'baz');
+  {
+    const options = getOptions({});
+    const { version } = await runTasks(...options);
+    assert.equal(version, undefined);
+  }
+});
+
 test('should use given whatBump when provided', async () => {
   setup();
   sh.exec(`git tag 1.0.0`);
