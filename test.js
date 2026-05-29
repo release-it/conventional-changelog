@@ -520,3 +520,24 @@ test('should respect a custom tag prefix when computing the recommended bump (#8
   // the bump is computed over all history (incl. feat 'pre') -> wrong 1.1.0.
   assert.equal(version, '1.0.1');
 });
+
+test('should apply custom preset types and hide hidden types (#78)', async () => {
+  setup(); // fix(foo)
+  sh.exec(`git tag 1.0.0`);
+  add('feat', 'bar');
+  add('chore', 'baz');
+
+  const options = getOptions({
+    preset: {
+      name: 'conventionalcommits',
+      types: [
+        { type: 'feat', section: '🚀 Features' },
+        { type: 'chore', hidden: true }
+      ]
+    }
+  });
+  const { changelog } = await runTasks(...options);
+  assert.match(changelog, /🚀 Features/); // custom section header is applied
+  assert.match(changelog, /bar/); // feat commit is listed
+  assert.doesNotMatch(changelog, /baz/); // hidden chore commit is omitted
+});

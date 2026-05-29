@@ -273,6 +273,22 @@ module.exports = {
 };
 ```
 
+A custom `writerOpts.transform` **replaces** the preset's own transform (the one that maps commit types to
+sections via [`preset.types`](#preset) and strips `hidden` types). Override it and you lose that behavior. Raw
+types appear and hidden types reappear. To filter or reshape the output while keeping the preset behavior, use
+[`finalizeContext`][26] instead.
+
+Since `conventional-changelog-writer@10`, the `commit` passed to `transform` is **read-only**. Return an
+extended object instead of mutating it:
+
+```js
+// Wrong: no-op or throws, the commit is read-only
+transform: commit => { commit.scope = '...'; return commit; }
+
+// Right: return an extended copy
+transform: commit => ({ ...commit, scope: '...' })
+```
+
 ## Command-line
 
 Options for this plugin can be set from the command line. Some examples:
@@ -294,6 +310,34 @@ When using this plugin in a GitHub Action, make sure to set [`fetch-depth: 0`][2
 determine the correct recommended bump and changelog.
 
 Also see [https://github.com/release-it/release-it/blob/main/docs/ci.md#github-actions][28]
+
+## Troubleshooting
+
+### `parseCommits is not a function`
+
+`@conventional-changelog/git-client` dynamically imports [`conventional-commits-parser`][23] and needs
+**v6+** (only v6 exports `parseCommits`). This error means your dependency tree resolved an older
+`conventional-commits-parser@5` for it. Usually another dependency (e.g. `@commitlint/cli`) pulls in v5, and
+`legacy-peer-deps=true` (or the yarn/pnpm equivalent) lets it win over git-client's `^6` peer requirement.
+
+Check which version is resolved:
+
+```
+npm ls conventional-commits-parser
+```
+
+Then fix it on your side with one of:
+
+- Force a single v6 via `overrides` (npm) / `resolutions` (yarn) / `pnpm.overrides`:
+  ```json
+  {
+    "overrides": {
+      "conventional-commits-parser": "^6"
+    }
+  }
+  ```
+- Remove `legacy-peer-deps=true` from your `.npmrc` so the `^6` peer requirement is honored.
+- Update the conflicting dependency (e.g. `@commitlint/*`) to a version that uses v6.
 
 [1]: https://github.com/release-it/release-it
 [2]:
