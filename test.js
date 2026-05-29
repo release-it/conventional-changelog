@@ -506,3 +506,17 @@ test('should apply custom issuePrefixes from parserOpts', async () => {
     assert.match(changelog, /closes.*#456/);
   }
 });
+
+test('should respect a custom tag prefix when computing the recommended bump (#80)', async () => {
+  setup(); // adds fix(foo)
+  add('feat', 'pre'); // a feature BEFORE the release tag
+  sh.exec(`git tag pkg-v1.0.0`);
+  add('fix', 'post'); // only a fix AFTER the release tag
+
+  const [config, container] = getOptions({ preset });
+  config.git.tagName = 'pkg-v${version}';
+  const { version } = await runTasks(config, container);
+  // Only a fix since pkg-v1.0.0 -> patch (1.0.1). Without honoring the prefix,
+  // the bump is computed over all history (incl. feat 'pre') -> wrong 1.1.0.
+  assert.equal(version, '1.0.1');
+});

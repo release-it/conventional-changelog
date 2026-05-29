@@ -53,10 +53,12 @@ class ConventionalChangelog extends Plugin {
     return options.ignoreRecommendedBump ? null : 'version';
   }
 
-  getInitialOptions(options, namespace) {
-    const tagName = options.git ? options.git.tagName : null;
-    options[namespace].tagPrefix = tagName ? tagName.replace(/v?\$\{version\}$/, '') : '';
-    return options[namespace];
+  getTagPrefix(latestVersion) {
+    if (this.options.tagPrefix) return this.options.tagPrefix;
+    const { latestTag } = this.config.getContext();
+    return latestTag && latestVersion && latestTag.endsWith(latestVersion)
+      ? latestTag.slice(0, latestTag.length - latestVersion.length)
+      : '';
   }
 
   async getChangelog(latestVersion) {
@@ -88,7 +90,9 @@ class ConventionalChangelog extends Plugin {
 
       if (options.preset) bumper.loadPreset(options.preset);
 
-      if (options.tagOpts) bumper.tag(options.tagOpts);
+      const tagPrefix = this.getTagPrefix(latestVersion);
+      const tagOpts = { ...(tagPrefix && { prefix: tagPrefix }), ...options.tagOpts };
+      if (Object.keys(tagOpts).length > 0) bumper.tag(tagOpts);
 
       if (options.commitsOpts || options.parserOpts) {
         bumper.commits(options.commitsOpts || {}, options.parserOpts);
@@ -128,7 +132,7 @@ class ConventionalChangelog extends Plugin {
 
         const gitClient = new ConventionalGitClient(options.cwd || process.cwd());
         const tagsIterable = gitClient.getSemverTags({
-          prefix: options.tagPrefix || '',
+          prefix: tagPrefix,
           skipUnstable: true
         });
 
@@ -137,7 +141,7 @@ class ConventionalChangelog extends Plugin {
           tags.push(tag);
         }
 
-        bumper.tag({ ...options.tagOpts, skipUnstable: true });
+        bumper.tag({ ...tagOpts, skipUnstable: true });
 
         const { releaseType: releaseTypeToLastNonPrerelease } = await bumper.bump(whatBumpFn);
 
