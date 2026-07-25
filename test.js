@@ -386,6 +386,21 @@ test('should not bump when recommended bump returns null', async () => {
   }
 });
 
+test('should not bump a pre-release when recommended bump returns null', async () => {
+  setup();
+  sh.exec(`git tag 1.0.0-alpha.0`);
+  add('chore', 'bar');
+
+  const whatBump = () => ({ level: null, reason: 'Parsed commits do not warrant a version bump.' });
+
+  for (const strictSemVer of [false, true]) {
+    const [config, container] = getOptions({ whatBump, strictSemVer });
+    config.preRelease = 'alpha';
+    const { version } = await runTasks(config, container);
+    assert.equal(version, undefined);
+  }
+});
+
 test('should not bump when whatBump === false', async () => {
   setup();
   sh.exec(`git tag 1.0.0`);
