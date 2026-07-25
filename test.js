@@ -76,10 +76,12 @@ const date = /\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/.source;
 const sha = /[0-9a-f]{7}/.source;
 const shaLong = /[0-9a-f]{40}/.source;
 const level = (from, to) => `${/patch/.test(semver.diff(from, to)) ? '##' : '#'}`;
-const header = (from, to, suffix = '', url = '') =>
-  `${level(from, to)} \\[${to}\\]\\(${url}/compare/${from}${suffix}...${to}${suffix}\\) ${date}`;
-const features = EOL + EOL + EOL + '### Features' + EOL;
-const fixes = EOL + EOL + EOL + '### Bug Fixes' + EOL;
+const header = (from, to, suffix = '', url = '') => {
+  const compareUrl = url ? `${url}/compare` : 'compare';
+  return `${level(from, to)} \\[${to}\\]\\(${compareUrl}/${from}${suffix}...${to}${suffix}\\) ${date}`;
+};
+const features = EOL + EOL + '### Features' + EOL;
+const fixes = EOL + EOL + '### Bug Fixes' + EOL;
 const commit = (type, name, url = '') => EOL + `\\* \\*\\*${name}:\\*\\* ${type} ${name} ${url ? `\\(\\[${sha}\\]\\(${url}/commit/${shaLong}\\)\\)` : sha}`;
 
 const nl = value => value.split(/\r\n|\r|\n/g).join(EOL);
@@ -130,7 +132,7 @@ test('should support tag suffix', async () => {
   assert.match(
     nl(changelog),
     // release-it supports tag suffix/template, but conventional-changelog does not so the title will not contain it:
-    /^## \[2\.0\.1\]\(\/compare\/2\.0\.0-next\.\.\.2\.0\.1-next\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\s*\* \*\*bar:\*\* fix bar [0-9a-f]{7}$/
+    /^## \[2\.0\.1\]\(compare\/2\.0\.0-next\.\.\.2\.0\.1-next\) \([0-9]{4}-[0-9]{2}-[0-9]{2}\)\s*### Bug Fixes\s*\* \*\*bar:\*\* fix bar [0-9a-f]{7}$/
   );
   const title = header(latestVersion, version, suffix);
   const bar = commit('fix', 'bar');
@@ -532,6 +534,20 @@ test('should pass parserOpts and writerOpts', async () => {
   assert.match(changelog, /feat/);
 });
 
+test('should support render-function writer partials', async () => {
+  setup();
+  sh.exec(`git tag 1.0.0`);
+  add('fix', 'bar');
+
+  const writerOpts = {
+    commitPartial: (_context, commit) => `CUSTOM: ${commit.header}`
+  };
+  const options = getOptions({ preset, writerOpts });
+  const { changelog } = await runTasks(...options);
+
+  assert.match(changelog, /CUSTOM: fix\(bar\): fix bar/);
+});
+
 test('should generate changelog with origin urls', async () => {
   setup();
 
@@ -577,16 +593,13 @@ test('should apply custom issuePrefixes from parserOpts', async () => {
   sh.exec(`git commit -m "fix(baz): fix baz" -m "Refs: XYZ-456"`);
 
   // Test 2: WITH custom issuePrefixes, the parser recognizes XYZ-456 as an issue
-  // The angular preset outputs issues with # prefix, so we check for #456
   {
     const parserOpts = {
       issuePrefixes: ['XYZ-']
     };
     const options = getOptions({ preset, parserOpts });
     const { changelog } = await runTasks(...options);
-    // With issuePrefixes: ['XYZ-'], the parser detects XYZ-456 as issue 456
-    // The angular writer template outputs it as #456 (hardcoded in template)
-    assert.match(changelog, /closes.*#456/);
+    assert.match(changelog, /closes.*XYZ-456/);
   }
 });
 
@@ -634,23 +647,43 @@ test('should preserve an explicit changelog boundary', async () => {
   assert.match(changelog, /fix post/);
 });
 
-test('should apply custom preset types and hide hidden types (#78)', async () => {
+test('should apply custom preset type effects (#78)', async () => {
   setup(); // fix(foo)
   sh.exec(`git tag 1.0.0`);
   add('feat', 'bar');
   add('chore', 'baz');
+  add('docs', 'qux');
 
   const options = getOptions({
     preset: {
       name: 'conventionalcommits',
       types: [
         { type: 'feat', section: '🚀 Features' },
-        { type: 'chore', hidden: true }
+        { type: 'chore', effect: 'hidden' },
+        { type: 'docs', section: 'Documentation', effect: 'changelog' }
       ]
     }
   });
-  const { changelog } = await runTasks(...options);
-  assert.match(changelog, /🚀 Features/); // custom section header is applied
-  assert.match(changelog, /bar/); // feat commit is listed
-  assert.doesNotMatch(changelog, /baz/); // hidden chore commit is omitted
+  const { changelog, version } = await runTasks(...options);
+  assert.equal(version, '1.1.0');
+  assert.match(changelog, /🚀 Features/);
+  assert.match(changelog, /bar/);
+  assert.doesNotMatch(changelog, /baz/);
+  assert.match(changelog, /Documentation/);
+  assert.match(changelog, /qux/);
+});
+
+test('should not bump for a changelog-only type effect', async () => {
+  setup();
+  sh.exec(`git tag 1.0.0`);
+  add('docs', 'bar');
+
+  const options = getOptions({
+    preset: {
+      name: 'conventionalcommits',
+      types: [{ type: 'docs', section: 'Documentation', effect: 'changelog' }]
+    }
+  });
+  const { version } = await runTasks(...options);
+  assert.equal(version, undefined);
 });

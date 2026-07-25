@@ -73,7 +73,15 @@ Use an object with `name` and `types` to use a custom preset:
           "type": "fix",
           "section": "Bug Fixes"
         },
-        {}
+        {
+          "type": "docs",
+          "section": "Documentation",
+          "effect": "changelog"
+        },
+        {
+          "type": "chore",
+          "effect": "hidden"
+        }
       ]
     }
   }
@@ -82,7 +90,15 @@ Use an object with `name` and `types` to use a custom preset:
 
 This is passed as the first argument to [`bumper.loadPreset`][16] (in both bumper and changelog writer).
 
-See the [Conventional Changelog Configuration Spec (v2.1.0)][17] for the configuration object to pass as `preset`.
+With the `conventionalcommits` preset, `types[].effect` controls changelog visibility and recommended bumps for
+non-breaking commits:
+
+- `bump` includes the commit in the changelog and bump recommendation. This is the default.
+- `changelog` includes the commit in the changelog without triggering a bump.
+- `hidden` excludes the commit from both.
+
+Breaking changes still trigger a major bump regardless of their type effect. See the
+[Conventional Commits preset options][17] for the full configuration contract.
 
 ## Bump
 
@@ -281,31 +297,29 @@ For example, you can use the following option to group the commits by 'scope' in
 }
 ```
 
-If you want to customize the templates used to write the changelog, you can do it like in a `.release-it.js` file like
-so:
+Customize the render functions in a `.release-it.js` file:
 
 ```js
-const fs = require('fs');
-
-const commitTemplate = fs.readFileSync('commit.hbs').toString();
-
 module.exports = {
   plugins: {
     '@release-it/conventional-changelog': {
       writerOpts: {
-        commitPartial: commitTemplate
+        commitPartial: (_context, commit) => `- ${commit.header}`
       }
     }
   }
 };
 ```
 
+`template`, `headerPartial`, `preamblePartial`, `commitPartial`, and `footerPartial` accept render functions.
+Handlebars template strings and partial files are no longer supported.
+
 A custom `writerOpts.transform` **replaces** the preset's own transform (the one that maps commit types to
-sections via [`preset.types`](#preset) and strips `hidden` types). Override it and you lose that behavior. Raw
-types appear and hidden types reappear. To filter or reshape the output while keeping the preset behavior, use
+sections via [`preset.types`](#preset) and strips types with `effect: "hidden"`). Override it and you lose that
+behavior. Raw types and hidden entries reappear. To filter or reshape the output while keeping the preset behavior, use
 [`finalizeContext`][26] instead.
 
-Since `conventional-changelog-writer@10`, the `commit` passed to `transform` is **read-only**. Return an
+Since `conventional-changelog-writer@9`, the `commit` passed to `transform` is **read-only**. Return an
 extended object instead of mutating it:
 
 ```js
@@ -343,9 +357,9 @@ Also see [https://github.com/release-it/release-it/blob/main/docs/ci.md#github-a
 ### `parseCommits is not a function`
 
 `@conventional-changelog/git-client` dynamically imports [`conventional-commits-parser`][23] and needs
-**v6+** (only v6 exports `parseCommits`). This error means your dependency tree resolved an older
-`conventional-commits-parser@5` for it. Usually another dependency (e.g. `@commitlint/cli`) pulls in v5, and
-`legacy-peer-deps=true` (or the yarn/pnpm equivalent) lets it win over git-client's `^6` peer requirement.
+**v7**. This error means your dependency tree resolved an older incompatible version. Usually another dependency
+(e.g. `@commitlint/cli`) pulls in an older version, and `legacy-peer-deps=true` (or the yarn/pnpm equivalent) lets it
+win over git-client's `^7` peer requirement.
 
 Check which version is resolved:
 
@@ -355,16 +369,16 @@ npm ls conventional-commits-parser
 
 Then fix it on your side with one of:
 
-- Force a single v6 via `overrides` (npm) / `resolutions` (yarn) / `pnpm.overrides`:
+- Force a single v7 via `overrides` (npm) / `resolutions` (yarn) / `pnpm.overrides`:
   ```json
   {
     "overrides": {
-      "conventional-commits-parser": "^6"
+      "conventional-commits-parser": "^7"
     }
   }
   ```
-- Remove `legacy-peer-deps=true` from your `.npmrc` so the `^6` peer requirement is honored.
-- Update the conflicting dependency (e.g. `@commitlint/*`) to a version that uses v6.
+- Remove `legacy-peer-deps=true` from your `.npmrc` so the `^7` peer requirement is honored.
+- Update the conflicting dependency (e.g. `@commitlint/*`) to a version that uses v7.
 
 [1]: https://github.com/release-it/release-it
 [2]:
@@ -385,7 +399,7 @@ Then fix it on your side with one of:
 [15]: #writeropts
 [16]:
   https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/README.md#api
-[17]: https://github.com/conventional-changelog/conventional-changelog-config-spec/blob/master/versions/2.1.0/README.md
+[17]: https://conventional-changelog.js.org/presets/conventional-commits/
 [18]: https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/git-client/src/types.ts
 [19]:
   https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-recommended-bump/src/types.ts
