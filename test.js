@@ -339,6 +339,43 @@ test(`should write and update infile`, async () => {
   }
 });
 
+test('should promote a pre-release using stable tag and writer policies', async () => {
+  const { dir } = setup();
+  sh.exec(`git tag 1.1.0`);
+  add('feat', 'bar');
+
+  const infile = path.join(dir, 'CHANGES.md');
+  const pluginOptions = {
+    preset: {
+      name: 'conventionalcommits',
+      types: [
+        { type: 'feat', section: 'Features' },
+        { type: 'chore', section: 'Chores', releaseAs: 'patch' }
+      ]
+    },
+    infile,
+    tagOpts: { skipUnstable: true },
+    writerOpts: { generateOn: null }
+  };
+  const [preReleaseConfig, container] = getOptions(pluginOptions, { commit: true, tag: true });
+  preReleaseConfig.git.commitMessage = 'chore(release): ${version}';
+  preReleaseConfig.preRelease = 'rc';
+  const { version: preReleaseVersion } = await runTasks(preReleaseConfig, container);
+  assert.equal(preReleaseVersion, '1.2.0-rc.0');
+
+  const [stableConfig] = getOptions(pluginOptions);
+  stableConfig.git.tagExclude = '*.*.*-*';
+  const { changelog, version } = await runTasks(stableConfig, container);
+  assert.equal(version, '1.2.0');
+  assert.match(changelog, /^##? \[1\.2\.0\]/m);
+  assert.doesNotMatch(changelog, /^##? \[1\.2\.0-rc\.0\]/m);
+  assert.match(changelog, /\*\*bar:\*\* feat bar/);
+
+  const persistedChangelog = fs.readFileSync(infile, 'utf8');
+  assert.equal((persistedChangelog.match(/^##? \[1\.2\.0\]/gm) || []).length, 1);
+  assert.equal((persistedChangelog.match(/^##? \[1\.2\.0-rc\.0\]/gm) || []).length, 1);
+});
+
 test('should stage a new infile without shell interpolation', async () => {
   const { dir } = setup();
   const infile = path.join(dir, 'CHANGES.md');

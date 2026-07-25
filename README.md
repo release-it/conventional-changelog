@@ -146,6 +146,33 @@ For example, from `1.0.0-alpha.0` a recommended bump of `minor` will result in a
 
 The default behavior results in a `prerelease` bump to `1.0.0-alpha.1`.
 
+### Promoting a pre-release
+
+The release-it `git.tagExclude` option only affects release-it's version lookup. The recommended bump and changelog
+writer have their own tag policies. Configure all three when a stable release should include every commit since the
+previous stable version:
+
+```json
+{
+  "git": {
+    "tagExclude": "*.*.*-*"
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "tagOpts": {
+        "skipUnstable": true
+      },
+      "writerOpts": {
+        "generateOn": null
+      }
+    }
+  }
+}
+```
+
+`tagOpts.skipUnstable` calculates the recommendation from the previous stable tag. `writerOpts.generateOn: null` keeps
+intermediate prerelease tags from splitting those commits into separate changelog blocks.
+
 ## Changelog
 
 ### `infile`
