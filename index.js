@@ -260,7 +260,7 @@ class ConventionalChangelog extends Plugin {
     );
 
     if (!hasInfile) {
-      await this.exec(`git add ${infile}`);
+      await this.exec(['git', 'add', '--', infile]);
     }
   }
 

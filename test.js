@@ -328,6 +328,26 @@ test(`should write and update infile`, async () => {
   }
 });
 
+test('should stage a new infile without shell interpolation', async () => {
+  const { dir } = setup();
+  const infile = path.join(dir, 'CHANGES.md');
+  const exec = mock.fn();
+  const [config, container] = getOptions({ preset, infile });
+  container.log = { ...log, exec };
+
+  await runTasks(config, container);
+
+  const stageCommand = exec.mock.calls
+    .map(call => call.arguments[0])
+    .find(command =>
+      Array.isArray(command)
+        ? command[0] === 'git' && command[1] === 'add' && command.includes(infile)
+        : command.startsWith('git add ') && command.includes(infile)
+    );
+
+  assert.deepEqual(stageCommand, ['git', 'add', '--', infile]);
+});
+
 test('should reject if conventional bump passes error', async () => {
   setup();
   const options = getOptions({ preset: 'what?' });
