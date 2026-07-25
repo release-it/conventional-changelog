@@ -61,6 +61,17 @@ const setup = () => {
   return { dir };
 };
 
+const setupUnmergedReleaseTag = initialTag => {
+  setup();
+  sh.exec(`git tag ${initialTag}`);
+  add('feat', 'pre');
+  sh.exec(`git branch develop`);
+  add('chore', 'release');
+  sh.exec(`git tag 1.1.0`);
+  sh.exec(`git switch develop`);
+  add('fix', 'post');
+};
+
 const date = /\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/.source;
 const sha = /[0-9a-f]{7}/.source;
 const shaLong = /[0-9a-f]{40}/.source;
@@ -554,6 +565,36 @@ test('should respect a custom tag prefix when computing the recommended bump (#8
   // Only a fix since pkg-v1.0.0 -> patch (1.0.1). Without honoring the prefix,
   // the bump is computed over all history (incl. feat 'pre') -> wrong 1.1.0.
   assert.equal(version, '1.0.1');
+});
+
+test('should use the latest tag from all refs as the recommended bump boundary (#99)', async () => {
+  setupUnmergedReleaseTag('1.0.0');
+
+  const [config, container] = getOptions({ preset });
+  config.git.getLatestTagFromAllRefs = true;
+  const { version } = await runTasks(config, container);
+  assert.equal(version, '1.1.1');
+});
+
+test('should preserve an explicit recommended bump tag policy', async () => {
+  setupUnmergedReleaseTag('legacy-1.0.0');
+
+  const [config, container] = getOptions({ preset, tagOpts: { prefix: 'legacy-' } });
+  config.git.getLatestTagFromAllRefs = true;
+  config.git.tagMatch = '1.*';
+  const { version } = await runTasks(config, container);
+  assert.equal(version, '1.2.0');
+});
+
+test('should preserve an explicit changelog boundary', async () => {
+  setupUnmergedReleaseTag('1.0.0');
+
+  const [config, container] = getOptions({ preset, gitRawCommitsOpts: { from: '1.0.0' } });
+  config.git.getLatestTagFromAllRefs = true;
+  const { changelog, version } = await runTasks(config, container);
+  assert.equal(version, '1.1.1');
+  assert.match(changelog, /feat pre/);
+  assert.match(changelog, /fix post/);
 });
 
 test('should apply custom preset types and hide hidden types (#78)', async () => {

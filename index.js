@@ -92,7 +92,13 @@ class ConventionalChangelog extends Plugin {
 
       const tagPrefix = this.getTagPrefix(latestVersion);
       const tagOpts = { ...(tagPrefix && { prefix: tagPrefix }), ...options.tagOpts };
-      if (Object.keys(tagOpts).length > 0) bumper.tag(tagOpts);
+      const { latestTag } = this.config.getContext();
+      const hasExplicitTagPolicy = options.tagPrefix !== undefined || Object.keys(options.tagOpts || {}).length > 0;
+      if (hasExplicitTagPolicy) {
+        bumper.tag(tagOpts);
+      } else if (latestTag) {
+        bumper.tag(latestTag);
+      }
 
       if (options.commitsOpts || options.parserOpts) {
         bumper.commits(options.commitsOpts || {}, options.parserOpts);
