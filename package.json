@@ -60,6 +60,9 @@
       "before:init": "pnpm test && installed-check"
     },
     "github": {
+      "npm": {
+        "stage": true
+      },
       "release": true,
       "releaseNotes": {
         "commit": "* ${commit.subject} (${sha}){ - thanks @${author.login}!}",
