@@ -54,9 +54,10 @@
   "engines": {
     "node": "^22.21.0 || >=24.0.0"
   },
+  "packageManager": "pnpm@11.17.0",
   "release-it": {
     "hooks": {
-      "before:init": "npm test && installed-check"
+      "before:init": "pnpm test && installed-check"
     },
     "github": {
       "release": true,

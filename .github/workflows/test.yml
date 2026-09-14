@@ -23,9 +23,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
       - run: |
           git config --global init.defaultBranch main
           git config --global user.name User
           git config --global user.email user@example.org
-      - run: npm install
-      - run: npm test
+      - run: pnpm install
+      - run: pnpm test
