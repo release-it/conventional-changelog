@@ -7,6 +7,20 @@ import { ConventionalGitClient } from '@conventional-changelog/git-client';
 import semver from 'semver';
 import concat from 'concat-stream';
 
+const normalizePreset = preset => {
+  if (typeof preset?.formatIssueUrl !== 'string') {
+    return preset;
+  }
+
+  const formatIssueUrl = preset.formatIssueUrl;
+
+  return {
+    ...preset,
+    formatIssueUrl: (_context, reference) =>
+      formatIssueUrl.replace(/\{\{id\}\}/g, reference.issue)
+  };
+};
+
 // Wrapper function to provide backward compatibility with the old API
 async function conventionalChangelog(
   options = {},
@@ -18,7 +32,7 @@ async function conventionalChangelog(
   const generator = new ConventionalChangelogGenerator(options.cwd || process.cwd());
 
   if (options.preset) {
-    generator.loadPreset(options.preset);
+    generator.loadPreset(normalizePreset(options.preset));
   }
 
   if (options.releaseCount !== undefined || options.append !== undefined) {
@@ -88,7 +102,9 @@ class ConventionalChangelog extends Plugin {
     try {
       const bumper = new Bumper();
 
-      if (options.preset) bumper.loadPreset(options.preset);
+      if (options.preset) {
+        bumper.loadPreset(normalizePreset(options.preset));
+      }
 
       const tagPrefix = this.getTagPrefix(latestVersion);
       const tagOpts = { ...(tagPrefix && { prefix: tagPrefix }), ...options.tagOpts };

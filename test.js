@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+
 import { mock, test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
@@ -27,7 +29,7 @@ const log = {
 };
 
 const namespace = 'conventional-changelog';
-const { pathname } = new URL('./index.js', import.meta.url);
+const pathname = fileURLToPath(new URL('./index.js', import.meta.url));
 const preset = { name: 'angular' };
 
 const getOptions = (options, git = { commit: false, tag: false }) => [
@@ -601,6 +603,26 @@ test('should apply custom issuePrefixes from parserOpts', async () => {
     const { changelog } = await runTasks(...options);
     assert.match(changelog, /closes.*XYZ-456/);
   }
+});
+
+test('should support string formatIssueUrl in preset config', async () => {
+  setup();
+
+  sh.exec(`git tag 1.0.0`);
+  sh.ShellString('bar').toEnd('bar');
+  sh.exec(`git add bar`);
+  sh.exec(`git commit -m "fix(bar): fix bar" -m "Refs: #123"`);
+
+  const options = getOptions({
+    context: { linkReferences: true },
+    preset: {
+      name: 'conventionalcommits',
+      formatIssueUrl: 'https://example.com/{{id}}'
+    }
+  });
+  const { changelog } = await runTasks(...options);
+
+  assert.match(changelog, /https:\/\/example\.com\/123/);
 });
 
 test('should respect a custom tag prefix when computing the recommended bump (#80)', async () => {
